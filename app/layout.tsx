@@ -45,10 +45,8 @@ export async function generateMetadata(): Promise<Metadata> {
       "Pura Agung Kertajaya adalah tempat suci umat Hindu di wilayah Tangerang yang menjadi pusat kegiatan spiritual, budaya, dan kebersamaan umat.",
     keywords: "Pura Agung Kertajaya, Hindu temple, Pura Tangerang, Tempat suci umat Hindu, Pua Agung",
     icons: {
-      icon: [
-        { url: faviconUrl, type: "image/png" }
-      ],
-    },
+        icon: "/favicon.ico",
+      },
     openGraph: {
       type: "website",
       locale: "id_ID",
