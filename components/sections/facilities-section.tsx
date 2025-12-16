@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { X, ArrowDown, ArrowUp } from "lucide-react"
+import { useEffect, useState, useRef } from "react"
+import { ArrowRight, CheckCircle2, Check, Star } from "lucide-react"
 import AOS from "aos"
 import "aos/dist/aos.css"
 
@@ -12,123 +12,195 @@ interface Facility {
     image_url: string
 }
 
-export default function FacilitiesSection() {
-    const [facilities, setFacilities] = useState<Facility[]>([])
-    const [loading, setLoading] = useState(true)
-    const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null)
-    const [showAll, setShowAll] = useState(false)
-    const [isHiding, setIsHiding] = useState(false)
+interface FacilitiesSectionProps {
+    initialData: Facility[]
+}
+
+export default function FacilitiesSection({ initialData }: FacilitiesSectionProps) {
+    const [activeFacility, setActiveFacility] = useState<Facility | null>(null)
+    const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+
+    const tabsContainerRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         AOS.init({ duration: 700, once: true })
-    }, [])
+        if (initialData.length > 0) setActiveFacility(initialData[0])
+    }, [initialData])
 
     useEffect(() => {
-        if (showAll) AOS.refresh()
-    }, [showAll])
+        if (!isAutoPlaying || !activeFacility) return
 
-    useEffect(() => {
-        const fetchFacilities = async () => {
-            try {
-                const res = await fetch("/api/public/facilities")
-                const data = await res.json()
-                setFacilities(Array.isArray(data) ? data : data.data || [])
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchFacilities()
-    }, [])
+        const interval = setInterval(() => {
+            const currentIndex = initialData.findIndex(f => f.id === activeFacility.id)
+            const nextIndex = (currentIndex + 1) % initialData.length
+            setActiveFacility(initialData[nextIndex])
 
-    const visibleCount = showAll ? facilities.length : 8
+            scrollTabIntoView(nextIndex)
+        }, 4000)
 
-    const handleToggleShowAll = () => {
-        if (showAll) {
-            setIsHiding(true)
-            setTimeout(() => {
-                setShowAll(false)
-                setIsHiding(false)
-            }, 500)
-        } else setShowAll(true)
+        return () => clearInterval(interval)
+    }, [activeFacility, isAutoPlaying, initialData])
+
+    const scrollTabIntoView = (index: number) => {
+        const container = tabsContainerRef.current
+        if (!container) return
+
+        const tabNode = container.children[index] as HTMLElement
+        if (!tabNode) return
+
+        const containerWidth = container.offsetWidth
+        const tabWidth = tabNode.offsetWidth
+        const tabLeft = tabNode.offsetLeft
+
+        const newScrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2)
+
+        container.scrollTo({
+            left: newScrollLeft,
+            behavior: 'smooth'
+        })
     }
 
+    const handleTabClick = (facility: Facility, index: number) => {
+        setActiveFacility(facility)
+        setIsAutoPlaying(false)
+        scrollTabIntoView(index)
+    }
+
+    if (!initialData || initialData.length === 0) return null;
+
     return (
-        <section id="facilities" className="py-20 md:py-32 bg-background">
-            <div className="section-container">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4" data-aos="fade-up">Fasilitas</h2>
-                    <div className="w-20 h-1 mx-auto mb-6" style={{ backgroundColor: "var(--orange)" }} data-aos="fade-up" data-aos-delay="100"></div>
-                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                        Nikmati berbagai fasilitas modern kami untuk kenyamanan pengunjung
+        <section id="facilities" className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
+            <div className="container mx-auto px-6 md:px-12">
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 md:mb-16" data-aos="fade-up">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="h-[2px] w-12 bg-orange-600"></div>
+                            <span className="text-orange-600 dark:text-orange-600 text-sm font-bold tracking-[0.2em] uppercase">
+                                Fasilitas Umum
+                            </span>
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                            Kenyamanan <span className="text-orange-600">Pengunjung</span>
+                        </h2>
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md text-sm md:text-base leading-relaxed text-left md:text-right">
+                        Berbagai fasilitas modern untuk menunjang kekhusyukan dan kenyamanan umat.
                     </p>
                 </div>
 
-                {loading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[...Array(4)].map((_, i) => (
-                            <div key={i} className="h-[320px] rounded-2xl animate-shimmer"></div>
+                <div className="hidden lg:grid grid-cols-12 gap-8 h-[600px]">
+                    <div
+                        className="col-span-4 flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar"
+                        onMouseEnter={() => setIsAutoPlaying(false)}
+                        onMouseLeave={() => setIsAutoPlaying(true)}
+                        data-aos="fade-right"
+                    >
+                        {initialData.map((facility) => (
+                            <div
+                                key={facility.id}
+                                onClick={() => setActiveFacility(facility)}
+                                className={`
+                                    group relative p-6 rounded-2xl cursor-pointer transition-all duration-300 border
+                                    ${activeFacility?.id === facility.id
+                                    ? "bg-white dark:bg-gray-800 border-orange-500/30 shadow-lg translate-x-2"
+                                    : "bg-transparent border-transparent hover:bg-white/50 dark:hover:bg-gray-800/50 hover:border-gray-200"
+                                }
+                                `}
+                            >
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className={`font-bold text-lg transition-colors ${activeFacility?.id === facility.id ? "text-orange-600" : "text-gray-700 dark:text-gray-300"}`}>
+                                        {facility.name}
+                                    </h3>
+                                    {activeFacility?.id === facility.id && (
+                                        <ArrowRight className="w-5 h-5 text-orange-500 animate-pulse" />
+                                    )}
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+                                    {facility.description}
+                                </p>
+                            </div>
                         ))}
                     </div>
-                ) : facilities.length > 0 ? (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {facilities.slice(0, visibleCount).map((facility, index) => {
-                                const isExiting = isHiding && index >= 8
-                                return (
-                                    <div
-                                        key={facility.id}
-                                        data-aos="fade-up"
-                                        data-aos-delay={(index % 4) * 100}
-                                        className={`cursor-pointer group ${isExiting ? "animate-fade-out-down" : ""}`}
-                                        onClick={() => setSelectedFacility(facility)}
-                                    >
-                                        <div className="group relative h-[320px] rounded-2xl shadow-lg overflow-hidden border border-transparent transition hover:shadow-xl hover:border-orange/50">
-                                            <img src={facility.image_url} alt={facility.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                            <div className="absolute left-4 right-4 bottom-4 rounded-xl bg-black/40 backdrop-blur-lg p-4 max-h-[5rem] transition-all duration-300 group-hover:max-h-40">
-                                                <h3 className="text-lg font-bold text-white mb-2">{facility.name}</h3>
-                                                <p className="text-sm text-white/90 opacity-0 transition-opacity duration-300 group-hover:opacity-100">{facility.description}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
 
-                        {facilities.length > 8 && (
-                            <div className="mt-10 text-center" data-aos="fade-up">
-                                <button
-                                    onClick={handleToggleShowAll}
-                                    disabled={isHiding}
-                                    className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-orange border border-orange disabled:opacity-50 transition-all hover:text-white hover:bg-[hsl(33_100%_50%)] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-[hsl(33_100%_50%)/0.3]"
-                                >
-                                    <span>{showAll ? "Lihat Lebih Sedikit" : "Lihat Semua"}</span>
-                                    {showAll ? (
-                                        <ArrowUp className="w-4 h-4 transition-transform group-hover:-translate-y-1" />
-                                    ) : (
-                                        <ArrowDown className="w-4 h-4 transition-transform group-hover:translate-y-1" />
-                                    )}
-                                </button>
+                    <div className="col-span-8 relative rounded-3xl overflow-hidden shadow-2xl bg-gray-200 dark:bg-gray-800" data-aos="fade-left">
+                        {activeFacility && (
+                            <div key={activeFacility.id} className="relative w-full h-full animate-in fade-in zoom-in-105 duration-700">
+                                <img src={activeFacility.image_url} alt={activeFacility.name} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                <div className="absolute bottom-6 left-6 right-6 md:max-w-xl p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl">
+                                    <div className="flex items-center gap-2 mb-3 text-orange-600 dark:text-orange-400 font-bold uppercase text-xs tracking-widest">
+                                        <CheckCircle2 className="w-4 h-4" /> Fasilitas Tersedia
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-bold mb-3 text-gray-900 dark:text-white">
+                                        {activeFacility.name}
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-base md:text-lg">
+                                        {activeFacility.description}
+                                    </p>
+                                </div>
                             </div>
                         )}
-                    </>
-                ) : (
-                    <p className="text-center py-12 text-muted-foreground">Informasi fasilitas tidak tersedia.</p>
-                )}
-
-                {selectedFacility && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedFacility(null)}>
-                        <div className="relative max-w-4xl w-full max-h-[80vh] rounded-2xl overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
-                            <img src={selectedFacility.image_url} alt={selectedFacility.name} className="w-full h-auto max-h-[80vh] object-contain" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/85 to-transparent p-6 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-                                <h3 className="text-2xl font-bold text-white mb-2">{selectedFacility.name}</h3>
-                                <p className="text-white/90 leading-relaxed">{selectedFacility.description}</p>
-                            </div>
-                            <button onClick={() => setSelectedFacility(null)} className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/40 transition">
-                                <X className="w-6 h-6 text-white" />
-                            </button>
-                        </div>
                     </div>
-                )}
+                </div>
+
+                <div className="lg:hidden flex flex-col gap-6" data-aos="fade-up">
+
+                    <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-gray-200 dark:bg-gray-800 border-4 border-white dark:border-gray-800">
+                        {activeFacility && (
+                            <div key={activeFacility.id} className="relative w-full h-full animate-in fade-in duration-500">
+                                <img
+                                    src={activeFacility.image_url}
+                                    alt={activeFacility.name}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-white uppercase tracking-wider">
+                                        <Star className="w-3 h-3 text-orange-400 fill-orange-400" />
+                                        Featured
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div
+                        ref={tabsContainerRef}
+                        className="flex overflow-x-auto gap-3 py-2 px-1 -mx-6 px-6 no-scrollbar snap-x scroll-smooth"
+                    >
+                        {initialData.map((facility, idx) => (
+                            <button
+                                key={facility.id}
+                                onClick={() => handleTabClick(facility, idx)}
+                                className={`
+                                    flex-shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border
+                                    ${activeFacility?.id === facility.id
+                                    ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-lg scale-105"
+                                    : "bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-orange-300"
+                                }
+                                `}
+                            >
+                                {facility.name}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm min-h-[140px] flex flex-col justify-center transition-all">
+                        {activeFacility && (
+                            <div key={activeFacility.id} className="animate-in slide-in-from-bottom-2 fade-in duration-500">
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                                    {activeFacility.name}
+                                    <CheckCircle2 className="w-5 h-5 text-orange-500" />
+                                </h3>
+                                <p className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm md:text-base">
+                                    {activeFacility.description}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
             </div>
         </section>
     )

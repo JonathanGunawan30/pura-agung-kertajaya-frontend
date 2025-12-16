@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Star } from "lucide-react"
+import { useEffect } from "react"
+import { Star, Quote } from "lucide-react"
 import Marquee from "react-fast-marquee"
 import AOS from "aos"
 import "aos/dist/aos.css"
@@ -14,107 +14,110 @@ interface Testimonial {
     avatar_url: string
 }
 
+interface TestimonialsSectionProps {
+    initialData: Testimonial[]
+}
+
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
     return (
-        <div className="shrink-0 w-[360px] md:w-[380px] mx-4 rounded-3xl p-6 bg-white/70 dark:bg-neutral-900/50 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_6px_20px_rgb(0,0,0,0.08)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.15)] transition-all duration-500 hover:-translate-y-1 h-[200px] flex flex-col justify-between mb-10">
+        <div className="
+            relative shrink-0 mx-3
+            w-[350px] md:w-[350px]
+            h-[200px] md:h-[200px]
+            p-5 md:p-6 rounded-2xl
+            bg-gray-50 dark:bg-gray-800
+            border border-gray-100 dark:border-gray-700
+            shadow-sm hover:shadow-lg hover:shadow-orange-500/5 hover:-translate-y-1
+            transition-all duration-500
+            flex flex-col justify-between overflow-hidden
+        ">
+            <div className="absolute top-4 right-5 opacity-5 pointer-events-none">
+                <Quote className="w-8 h-8 md:w-10 md:h-10 text-orange-500 fill-orange-500" />
+            </div>
+
             <div>
-                <div className="flex gap-1 mb-3">
+                <div className="flex gap-0.5 mb-3">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <Star
                             key={i}
-                            className="w-4 h-4"
-                            color={i < testimonial.rating ? "#FACC15" : "#d1d5db"}
-                            fill={i < testimonial.rating ? "#FACC15" : "transparent"}
+                            className="w-3.5 h-3.5"
+                            color={i < testimonial.rating ? "#F97316" : "#E5E7EB"}
+                            fill={i < testimonial.rating ? "#F97316" : "transparent"}
                         />
                     ))}
                 </div>
-                <p className="text-foreground/90 mb-4 text-sm leading-relaxed line-clamp-3">“{testimonial.comment}”</p>
-            </div>
-            <div className="flex items-center gap-3">
-                <img src={testimonial.avatar_url} alt={testimonial.name} className="w-12 h-12 rounded-full object-cover transition-transform duration-500 hover:scale-110" />
-                <div>
-                    <p className="font-semibold text-sm">{testimonial.name}</p>
-                    <p className="text-xs text-muted-foreground">Pengunjung</p>
-                </div>
-            </div>
-        </div>
-    )
-}
 
-function TestimonialCardSkeleton() {
-    return (
-        <div className="shrink-0 w-[360px] md:w-[380px] mx-4 rounded-3xl p-8 bg-muted/30 backdrop-blur-xl border border-white/10 animate-pulse h-[330px]">
-            <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-5 h-5 bg-muted rounded-full"></div>
-                ))}
-            </div>
-            <div className="space-y-3 mb-8">
-                <div className="h-4 bg-muted rounded w-5/6"></div>
-                <div className="h-4 bg-muted rounded w-4/6"></div>
-                <div className="h-4 bg-muted rounded w-3/6"></div>
-            </div>
-            <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div className="w-14 h-14 bg-muted rounded-full"></div>
-                <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-muted rounded w-1/3"></div>
-                    <div className="h-3 bg-muted rounded w-1/4"></div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-export default function TestimonialsSection() {
-    const [testimonials, setTestimonials] = useState<Testimonial[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        AOS.init({ duration: 700, once: true })
-    }, [])
-
-    useEffect(() => {
-        const fetchTestimonials = async () => {
-            try {
-                const response = await fetch("/api/public/testimonials")
-                const data = await response.json()
-                const items = data.data || []
-                setTestimonials(items.length > 0 && items.length < 5 ? [...items, ...items, ...items] : items)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchTestimonials()
-    }, [])
-
-    return (
-        <section className="py-20 md:py-32 bg-muted relative overflow-hidden">
-            <div className="section-container relative z-10">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight" data-aos="fade-up">Apa kata mereka</h2>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
-                        Kesan tulus dari para pengunjung yang telah merasakan kedamaian di Pura Agung Kertajaya.
+                <div className="relative z-10">
+                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-4 md:line-clamp-2 italic">
+                        "{testimonial.comment}"
                     </p>
                 </div>
             </div>
 
-            <div className="mt-16 relative z-10">
-                {loading ? (
-                    <div className="flex overflow-x-hidden">
-                        <TestimonialCardSkeleton />
-                        <TestimonialCardSkeleton />
-                        <TestimonialCardSkeleton />
-                        <TestimonialCardSkeleton />
+            <div className="flex items-center gap-3 pt-3 border-t border-gray-200 dark:border-gray-700 mt-auto">
+                <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-600 shrink-0">
+                    <img
+                        src={testimonial.avatar_url}
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+                <div className="min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm truncate">
+                        {testimonial.name}
+                    </p>
+                    <p className="text-[10px] text-orange-600 dark:text-orange-400 font-bold uppercase tracking-wider">
+                        Pengunjung
+                    </p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default function TestimonialsSection({ initialData }: TestimonialsSectionProps) {
+    useEffect(() => {
+        AOS.init({ duration: 700, once: true })
+    }, [])
+
+    if (!initialData || initialData.length === 0) return null;
+
+    const displayData = initialData.length < 4 ? [...initialData, ...initialData, ...initialData] : initialData
+
+    return (
+        <section className="py-24 bg-white dark:bg-gray-950 relative border-t border-gray-100 dark:border-gray-800 w-full max-w-[100vw] overflow-hidden">
+            <div className="container mx-auto px-6 md:px-12 relative z-10 mb-12">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8" data-aos="fade-up">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="h-[2px] w-12 bg-orange-600"></div>
+                            <span className="text-orange-600 dark:text-orange-600 text-sm font-bold tracking-[0.2em] uppercase">
+                                Kata Mereka
+                            </span>
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                            Pengalaman <span className="text-orange-600">Spiritual</span>
+                        </h2>
                     </div>
-                ) : testimonials.length > 0 ? (
-                    <Marquee pauseOnHover gradient gradientColor="hsl(var(--muted))" gradientWidth={120} speed={45}>
-                        {testimonials.map((testimonial, index) => (
-                            <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
-                        ))}
-                    </Marquee>
-                ) : (
-                    <div className="text-center py-12 text-muted-foreground">Testimonial tidak tersedia saat ini.</div>
-                )}
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md text-sm md:text-base leading-relaxed text-left md:text-right">
+                        Kesan tulus dari para pengunjung yang telah merasakan kedamaian dan keharmonisan di Pura Agung Kertajaya.
+                    </p>
+                </div>
+            </div>
+
+            <div className="relative z-10 w-full overflow-hidden">
+                <Marquee
+                    pauseOnHover
+                    gradient={true}
+                    gradientColor="var(--marquee-bg-white, #ffffff)"
+                    gradientWidth={100}
+                    speed={40}
+                    className="py-4 overflow-hidden"
+                >
+                    {displayData.map((testimonial, index) => (
+                        <TestimonialCard key={`${testimonial.id}-${index}`} testimonial={testimonial} />
+                    ))}
+                </Marquee>
             </div>
         </section>
     )

@@ -1,129 +1,196 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { X, ArrowDown, ArrowUp } from "lucide-react"
+import { useEffect, useState, useRef, useCallback } from "react"
+import { X, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import AOS from "aos"
 import "aos/dist/aos.css"
+import Link from "next/link"
 
-interface Gallery {
+export interface Gallery {
     id: string
     title: string
     image_url: string
     description: string
 }
 
-export default function GallerySection() {
-    const [galleries, setGalleries] = useState<Gallery[]>([])
-    const [loading, setLoading] = useState(true)
-    const [selectedImage, setSelectedImage] = useState<Gallery | null>(null)
-    const [showAll, setShowAll] = useState(false)
-    const [isHiding, setIsHiding] = useState(false)
+interface GallerySectionProps {
+    initialData: Gallery[]
+}
+
+export default function GallerySection({ initialData }: GallerySectionProps) {
+    const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+    const [activeIndex, setActiveIndex] = useState(0)
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+    const displayData = initialData?.slice(0, 6) || []
 
     useEffect(() => {
         AOS.init({ duration: 700, once: true })
     }, [])
 
-    useEffect(() => {
-        if (showAll) AOS.refresh()
-    }, [showAll])
+    const handleScroll = () => {
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current
+            const { scrollLeft, clientWidth, scrollWidth } = container
 
-    useEffect(() => {
-        const fetchGalleries = async () => {
-            try {
-                const res = await fetch("/api/public/galleries")
-                const data = await res.json()
-                setGalleries(data.data || [])
-            } finally {
-                setLoading(false)
+            if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                setActiveIndex(displayData.length - 1)
+                return
             }
+            if (scrollLeft === 0) {
+                setActiveIndex(0)
+                return
+            }
+            const itemWidth = clientWidth * 0.85
+            const newIndex = Math.round(scrollLeft / itemWidth)
+            const clampedIndex = Math.min(Math.max(newIndex, 0), displayData.length - 1)
+            setActiveIndex(clampedIndex)
         }
-        fetchGalleries()
-    }, [])
-
-    const visibleCount = showAll ? galleries.length : 6
-
-    const handleToggleShowAll = () => {
-        if (showAll) {
-            setIsHiding(true)
-            setTimeout(() => {
-                setShowAll(false)
-                setIsHiding(false)
-            }, 500)
-        } else setShowAll(true)
     }
 
+    const handlePrev = useCallback(() => {
+        if (selectedIndex === null) return
+        setSelectedIndex((prev) => (prev === 0 ? initialData.length - 1 : prev! - 1))
+    }, [selectedIndex, initialData.length])
+
+    const handleNext = useCallback(() => {
+        if (selectedIndex === null) return
+        setSelectedIndex((prev) => (prev === initialData.length - 1 ? 0 : prev! + 1))
+    }, [selectedIndex, initialData.length])
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (selectedIndex === null) return
+            if (e.key === "ArrowLeft") handlePrev()
+            if (e.key === "ArrowRight") handleNext()
+            if (e.key === "Escape") setSelectedIndex(null)
+        }
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+    }, [selectedIndex, handleNext, handlePrev])
+
+    if (!initialData || initialData.length === 0) return null;
+
+    const getGridClass = (index: number) => {
+        if (index === 0 || index === 1) return "md:col-span-2 md:row-span-2 h-[280px] md:h-[450px]"
+        return "md:col-span-1 h-[240px] md:h-[220px]"
+    }
+
+    const activeImage = selectedIndex !== null ? initialData[selectedIndex] : null
+
     return (
-        <section id="gallery" className="py-20 md:py-32 bg-background">
-            <div className="section-container">
-                <div className="text-center mb-16">
-                    <h2 data-aos="fade-up" className="text-4xl md:text-5xl font-bold mb-4">Galeri</h2>
-                    <div data-aos="fade-up" data-aos-delay="100" className="w-20 h-1 mx-auto mb-6" style={{ backgroundColor: "var(--orange)" }}></div>
-                    <p data-aos="fade-up" data-aos-delay="200" className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                        Temukan keindahan dan keajaiban Pura Agung Kertajaya melalui koleksi foto kami
+        <section id="gallery" className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
+            <div className="container mx-auto px-6 md:px-12">
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12" data-aos="fade-up">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className="h-[2px] w-12 bg-orange-600"></div>
+                            <span className="text-orange-600 dark:text-orange-600 text-sm font-bold tracking-[0.2em] uppercase">
+                                Galeri Foto
+                            </span>
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                            Momen di <span className="text-orange-600">Pura</span>
+                        </h2>
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md text-sm md:text-base leading-relaxed text-left md:text-right">
+                        Kumpulan dokumentasi kegiatan keagamaan, sosial, dan budaya yang mengabadikan keharmonisan umat.
                     </p>
                 </div>
 
-                {loading ? (
-                    <p className="text-center text-muted-foreground py-12">Memuat galeri...</p>
-                ) : galleries.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-12">Galeri tidak tersedia.</p>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {galleries.slice(0, visibleCount).map((g, idx) => {
-                                const isExiting = isHiding && idx >= 6
-                                return (
-                                    <div
-                                        key={g.id}
-                                        className={`cursor-pointer group ${isExiting ? "animate-fade-out-down" : ""}`}
-                                        data-aos="fade-up"
-                                        data-aos-delay={(idx % 3) * 100}
-                                        onClick={() => setSelectedImage(g)}
-                                    >
-                                        <div className="relative overflow-hidden rounded-2xl h-64 bg-muted">
-                                            <img src={g.image_url} alt={g.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/60 transition duration-300"></div>
-                                            <div className="absolute inset-0 flex flex-col justify-end p-6 text-white opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700">
-                                                <h3 className="text-xl font-bold mb-2">{g.title}</h3>
-                                                <p className="text-sm text-white/90">{g.description}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
+                <div
+                    ref={scrollContainerRef}
+                    onScroll={handleScroll}
+                    className="
+                        flex flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6
+                        md:grid md:grid-cols-4 md:gap-4 md:pb-0 md:mx-0 md:px-0 md:overflow-visible
+                        [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+                    "
+                >
+                    {displayData.map((item, idx) => (
+                        <div
+                            key={item.id}
+                            className={`
+                                relative group rounded-2xl overflow-hidden cursor-pointer flex-shrink-0 
+                                shadow-sm hover:shadow-xl transition-all duration-300 
+                                bg-gray-100 dark:bg-gray-800
+                                w-[85%] h-[400px] snap-center
+                                ${getGridClass(idx)} md:w-auto
+                            `}
+                            onClick={() => setSelectedIndex(idx)}
+                            data-aos="fade-up"
+                            data-aos-delay={idx * 100}
+                        >
+                            <img
+                                src={item.image_url}
+                                alt={item.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <p className={`text-white font-bold truncate ${idx < 2 ? 'text-lg md:text-xl' : 'text-sm'}`}>
+                                    {item.title}
+                                </p>
+
+                                <p className="text-white/70 text-[10px] uppercase tracking-wider mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75">
+                                    Lihat Foto
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                    <div className="w-[5%] flex-shrink-0 md:hidden"></div>
+                </div>
+
+                <div className="flex md:hidden justify-center gap-2 -mt-4 mb-8">
+                    {displayData.map((_, idx) => (
+                        <div
+                            key={idx}
+                            className={`h-1.5 rounded-full transition-all duration-300 
+                                ${idx === activeIndex ? "w-8 bg-orange-500" : "w-1.5 bg-gray-300 dark:bg-gray-700"}
+                            `}
+                        ></div>
+                    ))}
+                </div>
+
+                <div className="mt-4 md:mt-12 text-center" data-aos="fade-up">
+                    <Link href="/gallery">
+                        <button className="group inline-flex items-center gap-3 px-8 py-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm hover:shadow-lg hover:border-orange-500 transition-all duration-300">
+                            <span className="font-bold text-gray-900 dark:text-white group-hover:text-orange-600">Lihat Semua Galeri</span>
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                                <ArrowRight className="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-white" />
+                            </div>
+                        </button>
+                    </Link>
+                </div>
+
+                {activeImage && (
+                    <div
+                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setSelectedIndex(null)}
+                    >
+                        <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8" onClick={(e) => e.stopPropagation()}>
+                            <img src={activeImage.image_url} alt={activeImage.title} className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-sm shadow-2xl" />
                         </div>
 
-                        {galleries.length > 6 && (
-                            <div className="mt-10 text-center" data-aos="fade-up" data-aos-delay="100">
-                                <button
-                                    onClick={handleToggleShowAll}
-                                    disabled={isHiding}
-                                    className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-orange border border-orange disabled:opacity-50 transition-all hover:text-white hover:-translate-y-0.5 hover:bg-[hsl(33_100%_50%)] hover:shadow-xl hover:shadow-[hsl(33_100%_50%)/0.3]"
-                                >
-                                    <span>{showAll ? "Lihat Lebih Sedikit" : "Lihat Semua"}</span>
-                                    {showAll ? (
-                                        <ArrowUp className="w-4 h-4 transition-transform group-hover:-translate-y-1" />
-                                    ) : (
-                                        <ArrowDown className="w-4 h-4 transition-transform group-hover:translate-y-1" />
-                                    )}
-                                </button>
+                        <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-6 md:px-12 pointer-events-none">
+                            <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-end gap-4">
+                                <div className="text-left space-y-2 pointer-events-auto">
+                                    <h3 className="text-2xl md:text-3xl font-bold text-white">{activeImage.title}</h3>
+                                    <p className="text-gray-300 text-sm md:text-base max-w-2xl line-clamp-2 md:line-clamp-none">{activeImage.description}</p>
+                                </div>
+                                <div className="text-white font-mono text-sm md:text-lg tracking-widest opacity-80 whitespace-nowrap">
+                                    {selectedIndex! + 1} / {initialData.length}
+                                </div>
                             </div>
-                        )}
-                    </>
-                )}
-
-                {selectedImage && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" onClick={() => setSelectedImage(null)}>
-                        <div className="relative max-w-4xl w-full max-h-[80vh] rounded-2xl overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
-                            <img src={selectedImage.image_url} alt={selectedImage.title} className="w-full max-h-[80vh] object-contain" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/85 to-transparent p-6 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-                                <h3 className="text-2xl font-bold text-white mb-2">{selectedImage.title}</h3>
-                                <p className="text-white/90">{selectedImage.description}</p>
-                            </div>
-                            <button onClick={() => setSelectedImage(null)} className="absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/40 transition">
-                                <X className="w-6 h-6 text-white" />
-                            </button>
                         </div>
+
+                        <button onClick={(e) => { e.stopPropagation(); handlePrev() }} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 hover:scale-110 hidden md:block"><ChevronLeft className="w-8 h-8" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleNext() }} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 hover:scale-110 hidden md:block"><ChevronRight className="w-8 h-8" /></button>
+                        <button onClick={() => setSelectedIndex(null)} className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 group"><X className="w-6 h-6 group-hover:rotate-90 transition-transform" /></button>
                     </div>
                 )}
             </div>
