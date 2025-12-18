@@ -8,7 +8,7 @@ The website is designed to beautifully present the temple's profile, gallery, ac
 🚀 Tech Stack
 -------------
 
-*   **Next.js 16 (App Router)**
+*   **Next.js 16.0.10 (App Router)**
 
 *   **React + TypeScript**
 
@@ -85,7 +85,7 @@ npm install -g pnpm
 
 1.  **Clone this repository**:
     ```bash
-    git clone https://github.com/JonathanGunawan30/pura-agung-kertajaya-cms-frontend.git
+    git clone https://github.com/JonathanGunawan30/pura-agung-kertajaya-frontend.git
     ```
 
 2.  **Install all project dependencies**:
