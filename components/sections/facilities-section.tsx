@@ -85,7 +85,7 @@ export default function FacilitiesSection({ initialData }: FacilitiesSectionProp
                         </h2>
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 max-w-md text-sm md:text-base leading-relaxed text-left md:text-right">
-                        Berbagai fasilitas modern untuk menunjang kekhusyukan dan kenyamanan umat.
+                        Berbagai fasilitas untuk menunjang kekhusyukan dan kenyamanan umat.
                     </p>
                 </div>
 

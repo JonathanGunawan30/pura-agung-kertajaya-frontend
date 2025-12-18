@@ -1,4 +1,7 @@
-import {getAboutData, getActivitiesData, getGalleryData, getFacilitiesData, getTestimonialsData, getContactData} from "@/lib/api"
+export const revalidate = 60;
+console.log("[RENDER HOME]", new Date().toISOString());
+
+import {getAboutData, getActivitiesData, getGalleryData, getFacilitiesData, getTestimonialsData, getContactData, getHeroSlides, getSiteIdentity} from "@/lib/api"
 
 import HeroCarousel from "@/components/sections/hero-carousel"
 import AboutSection from "@/components/sections/about-section"
@@ -9,18 +12,20 @@ import TestimonialsSection from "@/components/sections/testimonials-section"
 import ContactSection from "@/components/sections/contact-section"
 
 export default async function Home() {
-    const [aboutData, galleryData, activitiesData, facilitiesData, testimonialsData, contactData] = await Promise.all([
+    const [aboutData, galleryData, activitiesData, facilitiesData, testimonialsData, contactData, heroSlides, siteIdentity] = await Promise.all([
         getAboutData(),
         getGalleryData(),
         getActivitiesData(),
         getFacilitiesData(),
         getTestimonialsData(),
-        getContactData()
+        getContactData(),
+        getHeroSlides(),
+        getSiteIdentity()
     ])
 
     return (
         <main className="min-h-screen">
-            <HeroCarousel />
+            <HeroCarousel slides={heroSlides} site={siteIdentity}/>
             <AboutSection initialData={aboutData} />
             <GallerySection initialData={galleryData}/>
             <ActivitiesSection initialData={activitiesData}/>

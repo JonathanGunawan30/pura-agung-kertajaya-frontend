@@ -6,19 +6,17 @@ import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { Sun, Moon, Menu, X } from "lucide-react"
 
-interface SiteIdentity {
+export interface SiteIdentity {
     site_name: string
     logo_url: string
 }
 
-export default function Navigation() {
+export default function Navigation({ site }: { site: SiteIdentity | null }) {
     const { theme, setTheme } = useTheme()
     const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false)
-    const [site, setSite] = useState<SiteIdentity | null>(null)
-    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         document.documentElement.style.overflowX = "hidden"
@@ -37,20 +35,6 @@ export default function Navigation() {
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
 
-    useEffect(() => {
-        const fetchSite = async () => {
-            try {
-                const res = await fetch("/api/public/site-identity")
-                const data = await res.json()
-                setSite(data.data || null)
-            } catch (err) {
-                console.error("Failed to load site identity:", err)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchSite()
-    }, [])
 
     const navItems = [
         { label: "Beranda", href: "/#home" },
@@ -89,7 +73,7 @@ export default function Navigation() {
                                 isScrolled ? "w-10 h-10" : "w-12 h-12 md:w-14 md:h-14"
                             }`}
                         >
-                            {!loading && site?.logo_url ? (
+                            {site?.logo_url ? (
                                 <img
                                     src={site.logo_url}
                                     alt="logo"
@@ -97,8 +81,8 @@ export default function Navigation() {
                                 />
                             ) : (
                                 <div
-                                    className={`w-full h-full rounded-full animate-pulse ${
-                                        isSolid ? "bg-gray-200" : "bg-white/30"
+                                    className={`w-full h-full rounded-full border-2 ${
+                                        isSolid ? "border-gray-200" : "border-white/30"
                                     }`}
                                 />
                             )}

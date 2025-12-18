@@ -1,9 +1,19 @@
 import Link from "next/link"
 import { Mail, MapPin, Phone, ArrowRight } from "lucide-react"
-import { getContactData } from "@/lib/api"
 
-export default async function Footer() {
-    const contact = await getContactData()
+interface FooterProps {
+    site?: {
+        site_name?: string
+        tagline?: string
+    } | null
+    contact?: {
+        address?: string
+        phone?: string
+        email?: string
+    } | null
+}
+
+export default function Footer({ site, contact }: FooterProps) {
 
     return (
         <footer className="bg-white dark:bg-gray-950 pt-20 pb-10 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
@@ -14,10 +24,10 @@ export default async function Footer() {
                     <div className="space-y-6">
                         <div>
                             <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                Pura Agung <span className="text-orange-600">Kertajaya</span>
+                                {site?.site_name || "Pura Agung Kertajaya"}
                             </h3>
                             <p className="text-gray-500 dark:text-gray-400 text-sm mt-4 leading-relaxed">
-                                Tempat suci umat Hindu di Tangerang yang menjadi pusat kegiatan spiritual, pelestarian budaya, dan kebersamaan umat yang harmonis.
+                                {site?.tagline || "Tempat suci umat Hindu di Tangerang yang menjadi pusat kegiatan spiritual, pelestarian budaya, dan kebersamaan umat yang harmonis."}
                             </p>
                         </div>
                     </div>
@@ -93,7 +103,7 @@ export default async function Footer() {
                 </div>
 
                 <div className="border-t border-gray-100 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-                    <p>&copy; {new Date().getFullYear()} Pura Agung Kertajaya. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} {site?.site_name || "Pura Agung Kertajaya"}. All rights reserved.</p>
                     <p>Designed & Developed with <span className="text-red-500">❤</span> for the Community.</p>
                 </div>
             </div>

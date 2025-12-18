@@ -119,12 +119,9 @@
   * {
     @apply border-border outline-ring/50;
   }
-  html {
-    color-scheme: light dark;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+    html, body {
+        background-color: #000000 !important;
+    }
 }
 
 @layer components {
@@ -290,7 +287,6 @@ html {
   --shimmer-end-color: oklch(0.2 0 0);
 }
 
-/* Fullscreen folding + fade reveal animation */
 @keyframes screenIn {
     0% {
         transform: translateY(-100%);
