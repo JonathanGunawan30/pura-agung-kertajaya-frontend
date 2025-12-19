@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Clock, MapPin, X, Share2, Check, XCircle, Calendar } from "lucide-react"
 
 interface Activity {
@@ -61,15 +61,14 @@ export default function ActivityModal({ activity, onClose }: ActivityModalProps)
 
     return (
         <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
             onClick={onClose}
         >
             <div
-                className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]"
+                className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
-
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-10 rounded-t-2xl">
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
                     <div className="flex items-center gap-3 text-orange-600">
                         <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                             <Calendar className="w-5 h-5" />
@@ -114,14 +113,14 @@ export default function ActivityModal({ activity, onClose }: ActivityModalProps)
                     </div>
                 </div>
 
-                <div className="p-6 md:p-8 overflow-y-auto">
+                <div className="p-6 md:p-8 overflow-y-auto flex-1">
                     <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                         {activity.title}
                     </h3>
 
                     <div className="flex flex-col sm:flex-row gap-4 mb-8">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-orange-600">
+                            <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-gray-800 flex items-center justify-center shrink-0 text-orange-600">
                                 <Clock className="w-5 h-5" />
                             </div>
                             <div>
@@ -131,7 +130,7 @@ export default function ActivityModal({ activity, onClose }: ActivityModalProps)
                         </div>
                         <div className="hidden sm:block w-px bg-gray-200 dark:bg-gray-800 h-10"></div>
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 text-blue-600">
+                            <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-gray-800 flex items-center justify-center shrink-0 text-blue-600">
                                 <MapPin className="w-5 h-5" />
                             </div>
                             <div>
