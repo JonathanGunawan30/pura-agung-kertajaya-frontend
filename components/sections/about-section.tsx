@@ -56,14 +56,14 @@ export default function AboutSection({ initialData }: { initialData: AboutData |
                         </div>
 
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6 py-4 md:py-8 border-y border-gray-100 dark:border-gray-800">
+                        <div className=" grid grid-cols-1 sm:grid-cols-3 gap-y-6 sm:gap-y-0 sm:gap-x-10 py-6 border-y border-gray-100 dark:border-gray-800">
                             {initialData.values?.slice(0, 3).map((val) => (
-                                <div key={val.id} className="text-left border-b border-gray-100 dark:border-gray-800 last:border-0 pb-3 sm:pb-0 sm:border-0">
-                                    <p className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 md:mb-2">
-                                        {val.value}
-                                    </p>
-                                    <p className="text-[10px] md:text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                                <div key={val.id} className="flex flex-col">
+                                    <p className=" text-sm sm:text-base font-semibold uppercase text-gray-800 dark:text-gray-400 mb-2">
                                         {val.title}
+                                    </p>
+                                    <p className=" text-sm leading-[1.65] text-gray-600 dark:text-gray-400 max-w-full sm:max-w-[260px] sm:min-h-[72px]">
+                                        {val.value}
                                     </p>
                                 </div>
                             ))}
