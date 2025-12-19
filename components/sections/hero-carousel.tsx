@@ -25,7 +25,7 @@ interface HeroCarouselProps {
 }
 
 export default function HeroCarousel({ slides = [], site }: HeroCarouselProps) {
-    const [currentSlide, setCurrentSlide] = useState(0)
+    const [currentSlide, setCurrentSlide] = useState<number>(0)
 
     useEffect(() => {
         if (slides.length === 0) return
@@ -36,37 +36,53 @@ export default function HeroCarousel({ slides = [], site }: HeroCarouselProps) {
         return () => clearInterval(interval)
     }, [slides.length])
 
-    const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length)
-    const prevSlide = () => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
+    const nextSlide = () =>
+        setCurrentSlide((prev) => (prev + 1) % slides.length)
+
+    const prevSlide = () =>
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)
 
     if (slides.length === 0 || !site) return null
 
     return (
         <section id="home" className="relative h-screen w-full overflow-hidden bg-black">
-
             <div className="absolute inset-0">
                 {slides.map((slide, i) => {
                     const isActive = i === currentSlide
+                    const hero = slide.image_url
+
                     return (
                         <div
                             key={slide.id}
-                            className={`absolute inset-0 transition-opacity duration-[2000ms] ease-in-out ${
+                            className={`absolute inset-0 transition-opacity duration-2000 ease-in-out ${
                                 isActive ? "opacity-100 z-10" : "opacity-0 z-0"
                             }`}
                         >
-                            <img
-                                src={slide.image_url}
-                                alt="Hero Slide"
-                                className={`
-                                    w-full h-full object-cover
-                                    transition-transform ease-linear
-                                    ${isActive
-                                    ? "scale-110 duration-[10000ms]"
-                                    : "scale-100 duration-0 delay-[2000ms]"
-                                }
-                                `}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80" />
+                            <picture>
+                                <source
+                                    media="(max-width: 768px)"
+                                    srcSet={`${hero}?width=800&height=1200&fit=cover&quality=70&format=webp`}
+                                />
+                                <source
+                                    media="(min-width: 769px)"
+                                    srcSet={`${hero}?width=1600&height=900&fit=cover&quality=75&format=webp`}
+                                />
+                                <img
+                                    src={`${hero}?width=1600&height=900&fit=cover&quality=75&format=webp`}
+                                    fetchPriority={isActive ? "high" : "auto"}
+                                    loading={isActive ? "eager" : "lazy"}
+                                    decoding="async"
+                                    className={`absolute inset-0 w-full h-full object-cover transition-transform ease-linear ${
+                                        isActive
+                                            ? "scale-110 duration-[10000ms]"
+                                            : "scale-100 duration-0 delay-[2000ms]"
+                                    }`}
+                                    alt=""
+                                />
+
+                            </picture>
+
+                            <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/20 to-black/80" />
                         </div>
                     )
                 })}
@@ -80,22 +96,37 @@ export default function HeroCarousel({ slides = [], site }: HeroCarouselProps) {
                     <p className="text-lg md:text-2xl text-gray-200 font-light max-w-2xl mx-auto leading-relaxed drop-shadow-lg">
                         {site.tagline}
                     </p>
+
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 md:pt-8">
-                        <a href={site.primary_button_link} className="group px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-lg shadow-orange-600/30 flex items-center gap-2">
+                        <a
+                            href={site.primary_button_link}
+                            className="group px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-lg shadow-orange-600/30 flex items-center gap-2"
+                        >
                             {site.primary_button_text}
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </a>
-                        <a href={site.secondary_button_link} className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white font-semibold rounded-full transition-all duration-300 hover:scale-105">
+
+                        <a
+                            href={site.secondary_button_link}
+                            className="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-sm text-white font-semibold rounded-full transition-all duration-300 hover:scale-105"
+                        >
                             {site.secondary_button_text}
                         </a>
                     </div>
                 </div>
             </div>
 
-            <button onClick={prevSlide} className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-orange-600 border border-white/10 backdrop-blur-md text-white transition-all duration-300">
+            <button
+                onClick={prevSlide}
+                className="hidden md:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-orange-600 border border-white/10 backdrop-blur-md text-white transition-all duration-300"
+            >
                 <ChevronLeft className="w-6 h-6" />
             </button>
-            <button onClick={nextSlide} className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-orange-600 border border-white/10 backdrop-blur-md text-white transition-all duration-300">
+
+            <button
+                onClick={nextSlide}
+                className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-white/10 hover:bg-orange-600 border border-white/10 backdrop-blur-md text-white transition-all duration-300"
+            >
                 <ChevronRight className="w-6 h-6" />
             </button>
 
@@ -104,7 +135,11 @@ export default function HeroCarousel({ slides = [], site }: HeroCarouselProps) {
                     <button
                         key={i}
                         onClick={() => setCurrentSlide(i)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ${i === currentSlide ? "w-8 bg-orange-500" : "w-2 bg-white/40 hover:bg-white/80"}`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                            i === currentSlide
+                                ? "w-8 bg-orange-500"
+                                : "w-2 bg-white/40 hover:bg-white/80"
+                        }`}
                     />
                 ))}
             </div>

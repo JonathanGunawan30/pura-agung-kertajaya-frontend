@@ -153,6 +153,7 @@ export default function FacilitiesSection({ initialData }: FacilitiesSectionProp
                                     src={activeFacility.image_url}
                                     alt={activeFacility.name}
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                                 <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
