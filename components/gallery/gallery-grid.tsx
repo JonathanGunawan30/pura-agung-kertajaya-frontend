@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { X, Search, ChevronLeft, ChevronRight, LayoutGrid, Grid as GridIcon, ArrowLeft } from "lucide-react"
-import { Gallery } from "@/components/sections/gallery-section"
+import { Gallery } from "@/components/sections/gallery-section" 
 import Link from "next/link"
+
+type EntityType = "pura" | "yayasan" | "pasraman"
 
 interface GalleryGridProps {
     items: Gallery[]
+    entityType: EntityType 
 }
 
-export default function GalleryGrid({ items }: GalleryGridProps) {
+export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
     const [mobileColumns, setMobileColumns] = useState<1 | 2>(1)
@@ -17,6 +20,35 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
 
     const touchStart = useRef<number | null>(null)
     const touchEnd = useRef<number | null>(null)
+
+    const themeConfig = {
+        pura: {
+            text: "text-orange-600",
+            ring: "ring-orange-500",
+            shadow: "shadow-orange-500/10",
+            hoverText: "hover:text-red-500",
+            bgHover: "hover:bg-orange-500",
+            linkBack: "/pura"
+        },
+        yayasan: {
+            text: "text-blue-600",
+            ring: "ring-blue-500",
+            shadow: "shadow-blue-500/10",
+            hoverText: "hover:text-blue-500",
+            bgHover: "hover:bg-blue-600",
+            linkBack: "/yayasan"
+        },
+        pasraman: {
+            text: "text-emerald-600",
+            ring: "ring-emerald-500",
+            shadow: "shadow-emerald-500/10",
+            hoverText: "hover:text-emerald-500",
+            bgHover: "hover:bg-emerald-600",
+            linkBack: "/pasraman"
+        }
+    }
+
+    const theme = themeConfig[entityType] || themeConfig.pura
 
     const filteredItems = items.filter(item =>
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,7 +98,6 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
 
     return (
         <div className="space-y-10">
-
             <div className="relative z-30 flex justify-center px-4 md:px-0">
                 <div className={`
                     flex flex-col md:flex-row items-center gap-3 md:gap-4 
@@ -75,12 +106,12 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
                     p-2 md:p-3 rounded-2xl md:rounded-full 
                     shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-white/20 dark:border-gray-800
                     transition-all duration-300
-                    ${isSearchFocused ? 'ring-2 ring-orange-500/20 shadow-orange-500/10 scale-[1.01]' : ''}
+                    ${isSearchFocused ? `ring-2 ${theme.ring}/20 ${theme.shadow} scale-[1.01]` : ''}
                 `}>
                     <div className="relative w-full flex-grow group">
                         <div className={`
                             absolute left-3 md:left-4 top-1/2 -translate-y-1/2 transition-colors duration-300
-                            ${isSearchFocused ? 'text-orange-500' : 'text-gray-400 group-hover:text-gray-600'}
+                            ${isSearchFocused ? theme.text : 'text-gray-400 group-hover:text-gray-600'}
                         `}>
                             <Search className="w-5 h-5" />
                         </div>
@@ -96,7 +127,7 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery("")}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 hover:text-red-500 transition-colors"
+                                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 transition-colors ${theme.hoverText}`}
                             >
                                 <X className="w-3 h-3" />
                             </button>
@@ -105,7 +136,7 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
 
                     <div className="flex items-center justify-between w-full md:w-auto gap-4 pl-2 md:pl-0 pr-2 md:pr-1">
                         <div className="hidden md:block text-xs font-medium text-gray-500 whitespace-nowrap px-2">
-                            <span className="text-orange-600 font-bold">{filteredItems.length}</span> Foto
+                            <span className={`${theme.text} font-bold`}>{filteredItems.length}</span> Foto
                         </div>
                         <div className="md:hidden text-xs font-bold text-gray-400">
                             {filteredItems.length} Hasil
@@ -113,13 +144,13 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
                         <div className="flex md:hidden bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shrink-0">
                             <button
                                 onClick={() => setMobileColumns(1)}
-                                className={`p-1.5 px-3 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${mobileColumns === 1 ? 'bg-white dark:bg-gray-700 shadow-sm text-orange-600' : 'text-gray-400'}`}
+                                className={`p-1.5 px-3 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${mobileColumns === 1 ? `bg-white dark:bg-gray-700 shadow-sm ${theme.text}` : 'text-gray-400'}`}
                             >
                                 <LayoutGrid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => setMobileColumns(2)}
-                                className={`p-1.5 px-3 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${mobileColumns === 2 ? 'bg-white dark:bg-gray-700 shadow-sm text-orange-600' : 'text-gray-400'}`}
+                                className={`p-1.5 px-3 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${mobileColumns === 2 ? `bg-white dark:bg-gray-700 shadow-sm ${theme.text}` : 'text-gray-400'}`}
                             >
                                 <GridIcon className="w-4 h-4" />
                             </button>
@@ -163,7 +194,7 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
                     <p className="text-gray-500">Coba kata kunci lain untuk "{searchQuery}"</p>
                     <button
                         onClick={() => setSearchQuery("")}
-                        className="mt-6 text-orange-600 font-semibold hover:underline"
+                        className={`mt-6 ${theme.text} font-semibold hover:underline`}
                     >
                         Hapus Pencarian
                     </button>
@@ -172,8 +203,8 @@ export default function GalleryGrid({ items }: GalleryGridProps) {
 
             <div className="pt-12 border-t border-gray-100 dark:border-gray-800 flex justify-center">
                 <Link
-                    href="/"
-                    className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-orange-500 hover:text-white text-gray-600 dark:text-gray-300 font-medium transition-all duration-300"
+                    href={theme.linkBack}
+                    className={`group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gray-100 dark:bg-gray-800 ${theme.bgHover} hover:text-white text-gray-600 dark:text-gray-300 font-medium transition-all duration-300`}
                 >
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     <span>Kembali ke Beranda</span>

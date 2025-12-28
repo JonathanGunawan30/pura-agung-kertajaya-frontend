@@ -7,7 +7,7 @@ export const metadata = {
 }
 
 export default async function AboutPage() {
-    const aboutData = await getAboutData()
+    const aboutData = await getAboutData("pura")
 
     return <AboutContent data={aboutData} />
 }

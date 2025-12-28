@@ -7,6 +7,6 @@ export const metadata = {
 }
 
 export default async function GalleryPage() {
-    const galleryData = await getGalleryData()
-    return <GalleryContent initialData={galleryData} />
+   const galleryData = await getGalleryData("pura")
+    return <GalleryContent initialData={galleryData} entityType="pura" />
 }
