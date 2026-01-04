@@ -9,7 +9,15 @@ import Link from "next/link"
 export interface Gallery {
     id: string
     title: string
-    image_url: string
+    images: {
+        xs?: string;
+        sm?: string;
+        md?: string;
+        lg?: string;
+        xl?: string;
+        fhd?: string;
+        blur?: string;
+    }
     description: string
 }
 
@@ -32,36 +40,49 @@ export default function ActivityGallerySection({
 }: ActivityGallerySectionProps) {
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
     const [activeIndex, setActiveIndex] = useState(0)
+    const [screenSize, setScreenSize] = useState<string>("lg")
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     const displayData = initialData?.slice(0, 6) || []
 
     useEffect(() => {
         AOS.init({ duration: 700, once: true })
+        const updateSize = () => {
+            const width = window.innerWidth
+            if (width < 640) setScreenSize("xs")
+            else if (width < 1024) setScreenSize("md")
+            else setScreenSize("lg")
+        }
+        updateSize()
+        window.addEventListener("resize", updateSize)
+        return () => window.removeEventListener("resize", updateSize)
     }, [])
 
     const themeConfig = {
         pura: {
-            text: "text-orange-600",
             bg: "bg-orange-600",
-            buttonHover: "hover:text-orange-600",
+            text: "text-orange-600",
+            buttonHover: "group-hover:text-orange-600",
             buttonBgHover: "group-hover:bg-orange-600",
+            buttonBorderHover: "group-hover:border-orange-600",
             dotActive: "bg-orange-600",
             shadowHover: "hover:shadow-orange-900/10",
         },
         yayasan: {
-            text: "text-blue-600",
             bg: "bg-blue-600",
-            buttonHover: "hover:text-blue-600",
+            text: "text-blue-600",
+            buttonHover: "group-hover:text-blue-600",
             buttonBgHover: "group-hover:bg-blue-600",
+            buttonBorderHover: "group-hover:border-blue-600",
             dotActive: "bg-blue-600",
             shadowHover: "hover:shadow-blue-900/10",
         },
         pasraman: {
-            text: "text-emerald-600",
             bg: "bg-emerald-600",
-            buttonHover: "hover:text-emerald-600",
+            text: "text-emerald-600",
+            buttonHover: "group-hover:text-emerald-600",
             buttonBgHover: "group-hover:bg-emerald-600",
+            buttonBorderHover: "group-hover:border-emerald-600",
             dotActive: "bg-emerald-600",
             shadowHover: "hover:shadow-emerald-900/10",
         },
@@ -69,21 +90,24 @@ export default function ActivityGallerySection({
 
     const theme = themeConfig[entityType] || themeConfig.pura
 
-    const getPasramanGridClass = (index: number) => {
-        if (index === 0) return "md:col-span-2 md:row-span-2 h-[450px] md:h-[600px]"
-        if (index === 1) return "md:col-span-1 md:row-span-1 h-[450px] md:h-[290px]"
-        if (index === 2) return "md:col-span-1 md:row-span-2 h-[450px] md:h-[600px]"
-        if (index === 3) return "md:col-span-1 md:row-span-1 h-[450px] md:h-[290px]"
-        if (index === 4) return "md:col-span-1 md:row-span-1 h-[450px] md:h-[290px]"
-        if (index === 5) return "md:col-span-2 md:row-span-1 h-[450px] md:h-[290px]"
-        return "h-[450px]"
+    const getGridClass = (index: number) => {
+        if (index === 0 || index === 1) return "md:col-span-2 md:row-span-2 h-[400px] md:h-[450px]"
+        return "md:col-span-1 h-[400px] md:h-[220px]"
+    }
+
+    const getOptimalUrl = (images: Gallery['images'], isLightbox = false) => {
+        if (isLightbox) return images.fhd || images.xl || images.lg || "";
+        if (screenSize === "xs") return images.sm || images.md || "";
+        return images.md || images.lg || "";
     }
 
     const handleScroll = () => {
         if (scrollContainerRef.current) {
-            const { scrollLeft, clientWidth } = scrollContainerRef.current
-            const index = Math.round(scrollLeft / (clientWidth * 0.85))
-            setActiveIndex(index)
+            const container = scrollContainerRef.current
+            const { scrollLeft, clientWidth } = container
+            const itemWidth = clientWidth * 0.85
+            const newIndex = Math.round(scrollLeft / itemWidth)
+            setActiveIndex(Math.min(Math.max(newIndex, 0), displayData.length - 1))
         }
     }
 
@@ -108,92 +132,130 @@ export default function ActivityGallerySection({
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [selectedIndex, handleNext, handlePrev])
 
-    if (!initialData || initialData.length === 0) return null
+    if (!initialData || initialData.length === 0) return null;
 
     const activeImage = selectedIndex !== null ? initialData[selectedIndex] : null
 
     return (
-        <section id="gallery" className="py-20 md:py-28 bg-white dark:bg-gray-950 overflow-hidden">
+        <section id="activities" className="py-24 bg-white dark:bg-black overflow-hidden transition-colors duration-500">
             <div className="container mx-auto px-6 md:px-12">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16" data-aos="fade-up">
-                    <div className="space-y-4 max-w-2xl">
-                        <div className="flex items-center gap-3">
-                            <div className={`h-[2px] w-10 ${theme.bg}`}></div>
-                            <span className={`${theme.text} dark:text-gray-300 text-xs md:text-sm font-bold tracking-[0.3em] uppercase`}>
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12" data-aos="fade-up">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <div className={`h-[2px] w-12 ${theme.bg}`}></div>
+                            <span className={`${theme.text} font-bold tracking-[0.2em] uppercase text-sm`}>
                                 {subtitle}
                             </span>
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                            {title.split(' ').slice(0, -1).join(' ')} <span className={`${theme.text}`}>{title.split(' ').pop()}</span>
+                        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                            {title.split(' ').slice(0, -1).join(' ')} <span className={theme.text}>{title.split(' ').pop()}</span>
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
-                            {description}
-                        </p>
                     </div>
+                    <p className="text-gray-500 dark:text-gray-400 max-w-md text-sm md:text-base leading-relaxed text-left md:text-right">
+                        {description}
+                    </p>
                 </div>
 
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
                     className="
-                        flex flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory gap-5 pb-10 -mx-6 px-6
-                        md:grid md:grid-cols-4 md:grid-rows-3 md:gap-4 md:pb-0 md:mx-0 md:px-0 md:overflow-visible
+                        flex flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6
+                        md:grid md:grid-cols-4 md:gap-4 md:pb-0 md:mx-0 md:px-0 md:overflow-visible
                         [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                     "
                 >
-                    {displayData.map((item, idx) => (
-                        <div
-                            key={item.id}
-                            className={`
-                                relative group rounded-3xl overflow-hidden cursor-pointer flex-shrink-0 
-                                shadow-lg shadow-gray-200 dark:shadow-none transition-all duration-500 
-                                bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-800
-                                w-[85%] snap-center ${theme.shadowHover}
-                                ${getPasramanGridClass(idx)} md:w-auto
-                            `}
-                            onClick={() => setSelectedIndex(idx)}
-                            data-aos="fade-up"
-                            data-aos-delay={idx * 75}
-                        >
-                            <img
-                                src={item.image_url}
-                                alt={item.title}
-                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 via-black/40 to-transparent translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p className="text-white font-bold leading-snug text-lg md:text-xl">
-                                    {item.title}
-                                </p>
-                                <p className="text-white/80 text-[10px] md:text-xs uppercase tracking-wider mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75 duration-300">
-                                    Lihat Detail
-                                </p>
+                    {displayData.map((item, idx) => {
+                        const thumbUrl = getOptimalUrl(item.images);
+                        const blurUrl = item.images.blur || "";
+
+                        return (
+                            <div
+                                key={item.id}
+                                className={`
+                                    relative group rounded-2xl overflow-hidden cursor-pointer flex-shrink-0 
+                                    shadow-sm hover:shadow-xl transition-all duration-300 
+                                    bg-gray-100 dark:bg-gray-800
+                                    w-[85vw] snap-center
+                                    ${getGridClass(idx)} md:w-auto
+                                `}
+                                onClick={() => setSelectedIndex(idx)}
+                                data-aos="fade-up"
+                                data-aos-delay={idx * 100}
+                            >
+                                <img
+                                    src={thumbUrl}
+                                    alt={item.title}
+                                    loading="lazy"
+                                    decoding="async"
+                                    style={{
+                                        backgroundImage: blurUrl ? `url(${blurUrl})` : "none",
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center"
+                                    }}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <p className={`text-white font-bold truncate ${idx < 2 ? 'text-lg md:text-xl' : 'text-sm'}`}>
+                                        {item.title}
+                                    </p>
+                                    <p className="text-white/70 text-[10px] uppercase tracking-wider mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75">
+                                        Lihat Foto
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                    <div className="w-[1px] flex-shrink-0 md:hidden invisible"></div>
+                        )
+                    })}
+                    <div className="w-[5vw] flex-shrink-0 md:hidden"></div>
                 </div>
 
-                <div className="flex md:hidden justify-center gap-2.5 -mt-2 mb-10">
+                <div className="flex md:hidden justify-center gap-2 -mt-4 mb-8">
                     {displayData.map((_, idx) => (
                         <div
                             key={idx}
-                            className={`h-2 rounded-full transition-all duration-300 
-                                ${idx === activeIndex ? `w-9 ${theme.dotActive}` : "w-2 bg-gray-300 dark:bg-gray-700"}
+                            className={`h-1.5 rounded-full transition-all duration-300 
+                                ${idx === activeIndex ? `w-8 ${theme.dotActive}` : "w-1.5 bg-gray-300 dark:bg-gray-700"}
                             `}
                         ></div>
                     ))}
                 </div>
 
-                <div className="mt-10 md:mt-16 text-center" data-aos="fade-up">
-                    <Link href={`/${entityType}/gallery`}>
-                        <button className={`group inline-flex items-center gap-3 px-9 py-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full shadow-sm hover:shadow-lg transition-all duration-300 ${theme.shadowHover}`}>
-                            <span className={`font-bold text-gray-900 dark:text-white transition-colors ${theme.buttonHover}`}>Lihat Semua Dokumentasi</span>
-                            <div className={`w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-colors ${theme.buttonBgHover}`}>
-                                <ArrowRight className="w-4 h-4 text-gray-600 dark:text-gray-300 group-hover:text-white" />
+                <div className="mt-12 md:mt-20 text-center" data-aos="fade-up">
+                    <Link href={`/${entityType}/gallery`} className="group inline-flex items-center gap-4 md:gap-6">
+                        <span className={`text-base md:text-lg font-bold text-gray-900 dark:text-white transition-colors duration-300 ${theme.buttonHover}`}>
+                            Lihat Semua Dokumentasi
+                        </span>
+                        
+                        <div className="relative">
+                            <div className={`absolute inset-0 rounded-full scale-100 group-hover:animate-ping-slow opacity-0 group-hover:opacity-100 transition-opacity ${theme.bg} opacity-20`}></div>
+                            <div className={`absolute inset-0 rounded-full scale-100 group-hover:animate-ping-slower opacity-0 group-hover:opacity-100 transition-opacity ${theme.bg} opacity-10`}></div>
+                            
+                            <div className={`relative flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full border border-gray-200 dark:border-gray-800 transition-all duration-500 ${theme.buttonBorderHover} ${theme.buttonBgHover} z-10`}>
+                                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 text-gray-600 dark:text-gray-400 group-hover:text-white transition-colors duration-300" />
                             </div>
-                        </button>
+                        </div>
                     </Link>
+
+                    <style jsx global>{`
+                        @keyframes ping-slow {
+                            0% { transform: scale(1); opacity: 0.8; }
+                            70%, 100% { transform: scale(2); opacity: 0; }
+                        }
+                        @keyframes ping-slower {
+                            0% { transform: scale(1); opacity: 0.5; }
+                            100% { transform: scale(2.5); opacity: 0; }
+                        }
+                        .group:hover .group-hover\:animate-ping-slow {
+                            animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+                        }
+                        .group:hover .group-hover\:animate-ping-slower {
+                            animation: ping-slower 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+                        }
+                    `}</style>
                 </div>
 
                 {activeImage && (
@@ -203,8 +265,12 @@ export default function ActivityGallerySection({
                     >
                         <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8" onClick={(e) => e.stopPropagation()}>
                             <img 
-                                src={activeImage.image_url} 
+                                src={getOptimalUrl(activeImage.images, true)} 
                                 alt={activeImage.title} 
+                                style={{
+                                    backgroundImage: `url(${activeImage.images.blur})`,
+                                    backgroundSize: 'cover'
+                                }}
                                 className="max-w-full max-h-[80vh] md:max-h-[85vh] object-contain rounded-sm shadow-2xl" 
                             />
                         </div>

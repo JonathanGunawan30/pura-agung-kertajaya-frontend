@@ -5,12 +5,16 @@ import AOS from "aos"
 import "aos/dist/aos.css"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+interface AboutImages {
+    xs?: string; sm?: string; md?: string; lg?: string; xl?: string;
+    "2xl"?: string; fhd?: string; blur?: string;
+}
 
 interface AboutData {
     id: string
     title: string
     description: string
-    image_url: string
+    images: AboutImages
 }
 
 interface AboutContentProps {
@@ -26,6 +30,14 @@ export default function AboutContent({ data }: AboutContentProps) {
     if (!data) return null;
 
     const paragraphs = data.description.split("\n").filter(p => p.trim()) || []
+
+    const getImageUrl = (imgs: AboutImages) => {
+        if (!imgs) return "";
+        return imgs.fhd || imgs["2xl"] || imgs.xl || imgs.lg || imgs.md || "";
+    }
+
+    const mainImageUrl = getImageUrl(data.images);
+    const blurUrl = data.images.blur || "";
 
     return (
         <section className="pt-32 pb-20 bg-white dark:bg-gray-950 overflow-hidden min-h-screen">
@@ -51,11 +63,16 @@ export default function AboutContent({ data }: AboutContentProps) {
                 </div>
 
                 <div className="w-full flex justify-center mb-16" data-aos="zoom-in" data-aos-duration="1000">
-                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 relative bg-gray-100 dark:bg-gray-900">
                         <img
                             loading="lazy"
-                            src={data.image_url}
+                            src={mainImageUrl}
                             alt="Pura Agung Kertajaya"
+                            style={{ 
+                                backgroundImage: blurUrl ? `url(${blurUrl})` : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
                             className="w-full h-full object-cover object-center"
                         />
                     </div>

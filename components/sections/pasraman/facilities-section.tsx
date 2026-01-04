@@ -5,11 +5,19 @@ import { CheckCircle2, GraduationCap, School, BookOpen, Users } from "lucide-rea
 import AOS from "aos"
 import "aos/dist/aos.css"
 
-interface Facility {
+export interface Facility {
     id: string
     name: string
     description: string
-    image_url: string
+    images: {
+        xs?: string;
+        sm?: string;
+        md?: string;
+        lg?: string;
+        xl?: string;
+        fhd?: string;
+        blur?: string;
+    }
 }
 
 interface FacilitiesSectionProps {
@@ -19,12 +27,41 @@ interface FacilitiesSectionProps {
 export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSectionProps) {
     const [activeFacility, setActiveFacility] = useState<Facility | null>(null)
     const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-    const tabsContainerRef = useRef<HTMLDivElement>(null)
+    const [screenSize, setScreenSize] = useState<string>("lg")
+    
+    const desktopSliderRef = useRef<HTMLDivElement>(null)
+    const mobileTabsRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         AOS.init({ duration: 700, once: true })
         if (initialData.length > 0) setActiveFacility(initialData[0])
+
+        const updateSize = () => {
+            const width = window.innerWidth
+            if (width < 640) setScreenSize("xs")
+            else if (width < 1024) setScreenSize("md")
+            else setScreenSize("lg")
+        }
+        updateSize()
+        window.addEventListener("resize", updateSize)
+        return () => window.removeEventListener("resize", updateSize)
     }, [initialData])
+
+    const scrollToItem = (ref: React.RefObject<HTMLDivElement | null>, index: number) => {
+        const container = ref.current
+        if (!container) return
+        
+        const node = container.children[index] as HTMLElement
+        if (!node) return
+
+        const containerWidth = container.offsetWidth
+        const nodeWidth = node.offsetWidth
+        const nodeLeft = node.offsetLeft
+        
+        const newScrollLeft = nodeLeft - (containerWidth / 2) + (nodeWidth / 2)
+        
+        container.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    }
 
     useEffect(() => {
         if (!isAutoPlaying || !activeFacility) return
@@ -35,23 +72,29 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
             setActiveFacility(initialData[nextIndex])
             
             if (window.innerWidth < 1024) {
-                scrollTabIntoView(nextIndex)
+                scrollToItem(mobileTabsRef, nextIndex)
+            } else {
+                scrollToItem(desktopSliderRef, nextIndex)
             }
         }, 5000)
 
         return () => clearInterval(interval)
     }, [activeFacility, isAutoPlaying, initialData])
 
-    const scrollTabIntoView = (index: number) => {
-        const container = tabsContainerRef.current
-        if (!container) return
-        const tabNode = container.children[index] as HTMLElement
-        if (!tabNode) return
-        const containerWidth = container.offsetWidth
-        const tabWidth = tabNode.offsetWidth
-        const tabLeft = tabNode.offsetLeft
-        const newScrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2)
-        container.scrollTo({ left: newScrollLeft, behavior: 'smooth' })
+    const handleManualClick = (facility: Facility, index: number, isDesktop: boolean) => {
+        setActiveFacility(facility)
+        setIsAutoPlaying(false)
+        if (isDesktop) {
+            scrollToItem(desktopSliderRef, index)
+        } else {
+            scrollToItem(mobileTabsRef, index)
+        }
+    }
+
+    const getOptimalUrl = (images: Facility['images']) => {
+        if (screenSize === "xs") return images.sm || images.md || "";
+        if (screenSize === "md") return images.md || images.lg || "";
+        return images.lg || images.xl || "";
     }
 
     if (!initialData || initialData.length === 0) return null
@@ -60,7 +103,6 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
         <section id="facilities" className="py-24 bg-white dark:bg-gray-950 overflow-hidden">
             <div className="container mx-auto px-6 md:px-12">
                 
-                {/* Header Section */}
                 <div className="flex flex-col items-center text-center mb-16 space-y-4" data-aos="fade-up">
                     <div className="flex items-center gap-3">
                         <div className="h-[2px] w-8 bg-emerald-600"></div>
@@ -75,17 +117,20 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
                     </p>
                 </div>
 
-                {/* DESKTOP VERSION (Interactive Showcase) */}
                 <div className="hidden lg:flex flex-col gap-8">
-                    {/* Main Stage */}
-                    <div className="relative w-full h-[550px] rounded-[2.5rem] overflow-hidden group shadow-2xl" data-aos="zoom-in">
+                    <div className="relative w-full h-[550px] rounded-[2.5rem] overflow-hidden group shadow-2xl bg-gray-100 dark:bg-gray-900" data-aos="zoom-in">
                         {activeFacility && (
                             <>
                                 <img 
                                     key={activeFacility.id}
-                                    src={activeFacility.image_url} 
+                                    src={getOptimalUrl(activeFacility.images)} 
                                     alt={activeFacility.name} 
                                     className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-1000"
+                                    style={{
+                                        backgroundImage: activeFacility.images.blur ? `url(${activeFacility.images.blur})` : "none",
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center"
+                                    }}
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent"></div>
                                 
@@ -112,38 +157,60 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
                         )}
                     </div>
 
-                    {/* Navigation Cards Grid */}
-                    <div className="grid grid-cols-4 gap-4" data-aos="fade-up" data-aos-delay="200">
-                        {initialData.slice(0, 4).map((facility, idx) => (
-                            <button
-                                key={facility.id}
-                                onClick={() => { setActiveFacility(facility); setIsAutoPlaying(false); }}
-                                className={`relative h-32 rounded-3xl overflow-hidden transition-all duration-500 group ${
-                                    activeFacility?.id === facility.id 
-                                    ? "ring-4 ring-emerald-500 ring-offset-4 dark:ring-offset-gray-950 scale-[0.98]" 
-                                    : "opacity-70 hover:opacity-100"
-                                }`}
-                            >
-                                <img src={facility.image_url} alt={facility.name} className="w-full h-full object-cover" />
-                                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-emerald-900/40 transition-colors`}>
-                                    <span className="text-white font-bold text-center px-4 leading-tight">{facility.name}</span>
-                                </div>
-                                {activeFacility?.id === facility.id && (
-                                    <div className="absolute top-2 right-2 bg-emerald-500 p-1 rounded-full text-white">
-                                        <CheckCircle2 className="w-3 h-3" />
+                    <div className="relative group/slider" data-aos="fade-up" data-aos-delay="200">
+                        <div 
+                            ref={desktopSliderRef}
+                            className="flex gap-4 overflow-x-auto py-4 -mx-2 px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x scroll-smooth"
+                        >
+                            {initialData.map((facility, idx) => (
+                                <button
+                                    key={facility.id}
+                                    onClick={() => handleManualClick(facility, idx, true)}
+                                    className={`
+                                        relative flex-shrink-0 w-[280px] h-32 rounded-3xl overflow-hidden transition-all duration-500 group snap-start
+                                        ${activeFacility?.id === facility.id 
+                                            ? "ring-4 ring-emerald-500 ring-offset-4 dark:ring-offset-gray-950 scale-[0.98]" 
+                                            : "opacity-70 hover:opacity-100 hover:scale-[1.02]"
+                                        }
+                                    `}
+                                >
+                                    <img 
+                                        src={getOptimalUrl(facility.images)} 
+                                        alt={facility.name} 
+                                        className="w-full h-full object-cover" 
+                                        style={{
+                                            backgroundImage: facility.images.blur ? `url(${facility.images.blur})` : "none",
+                                            backgroundSize: "cover"
+                                        }}
+                                    />
+                                    <div className={`absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-emerald-900/40 transition-colors`}>
+                                        <span className="text-white font-bold text-center px-4 leading-tight text-sm md:text-base">{facility.name}</span>
                                     </div>
-                                )}
-                            </button>
-                        ))}
+                                    {activeFacility?.id === facility.id && (
+                                        <div className="absolute top-2 right-2 bg-emerald-500 p-1 rounded-full text-white animate-in zoom-in duration-300">
+                                            <CheckCircle2 className="w-3 h-3" />
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* MOBILE VERSION (Consistent with previous design) */}
                 <div className="lg:hidden flex flex-col gap-6" data-aos="fade-up">
                     <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-gray-200 dark:bg-gray-800 border-4 border-white dark:border-gray-800">
                         {activeFacility && (
                             <div key={activeFacility.id} className="relative w-full h-full animate-in fade-in duration-500">
-                                <img src={activeFacility.image_url} alt={activeFacility.name} className="w-full h-full object-cover" />
+                                <img 
+                                    src={getOptimalUrl(activeFacility.images)} 
+                                    alt={activeFacility.name} 
+                                    className="w-full h-full object-cover" 
+                                    style={{
+                                        backgroundImage: activeFacility.images.blur ? `url(${activeFacility.images.blur})` : "none",
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center"
+                                    }}
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                                 <div className="absolute top-4 right-4 bg-emerald-600 px-3 py-1 rounded-full border border-white/20 shadow-lg">
                                     <div className="flex items-center gap-1.5 text-xs font-bold text-white uppercase tracking-wider">
@@ -154,11 +221,11 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
                         )}
                     </div>
 
-                    <div ref={tabsContainerRef} className="flex overflow-x-auto gap-3 py-2 -mx-6 px-6 no-scrollbar snap-x scroll-smooth">
+                    <div ref={mobileTabsRef} className="flex overflow-x-auto gap-3 py-2 -mx-6 px-6 no-scrollbar snap-x scroll-smooth">
                         {initialData.map((facility, idx) => (
                             <button
                                 key={facility.id}
-                                onClick={() => { setActiveFacility(facility); setIsAutoPlaying(false); scrollTabIntoView(idx); }}
+                                onClick={() => handleManualClick(facility, idx, false)}
                                 className={`flex-shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border ${
                                     activeFacility?.id === facility.id
                                     ? "bg-emerald-600 text-white border-emerald-600 shadow-lg scale-105"

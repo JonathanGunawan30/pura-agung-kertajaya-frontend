@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
-import { User, ChevronDown } from "lucide-react"
+import { useEffect, useState } from "react"
+import { User, ChevronDown, Network, ZoomIn, X, ZoomOut, RotateCcw } from "lucide-react"
 import AOS from "aos"
 import "aos/dist/aos.css"
 
@@ -20,18 +20,32 @@ interface OrganizationContentProps {
     entityType: EntityType
     title?: string
     subtitle?: string
+    structureImageUrl?: string | null
 }
 
-export default function OrganizationContent({ 
-    initialData, 
+export default function OrganizationContent({
+    initialData,
     entityType,
     title = "Struktur Organisasi",
-    subtitle = "Susunan Pengurus"
+    subtitle = "Susunan Pengurus",
+    structureImageUrl
 }: OrganizationContentProps) {
-    
+
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false)
+    const [zoomLevel, setZoomLevel] = useState(1)
+
     useEffect(() => {
         AOS.init({ duration: 800, once: true })
     }, [])
+
+    useEffect(() => {
+        if (isLightboxOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = 'unset'
+            setZoomLevel(1)
+        }
+    }, [isLightboxOpen])
 
     const themeConfig = {
         pura: {
@@ -45,6 +59,7 @@ export default function OrganizationContent({
             textHover: "group-hover/member:text-orange-600",
             chevronText: "text-orange-500",
             gradientText: "text-orange-600",
+            bgSoft: "bg-orange-50 dark:bg-orange-900/10",
         },
         yayasan: {
             line: "bg-blue-600",
@@ -57,6 +72,7 @@ export default function OrganizationContent({
             textHover: "group-hover/member:text-blue-600",
             chevronText: "text-blue-500",
             gradientText: "text-blue-600",
+            bgSoft: "bg-blue-50 dark:bg-blue-900/10",
         },
         pasraman: {
             line: "bg-emerald-600",
@@ -69,6 +85,7 @@ export default function OrganizationContent({
             textHover: "group-hover/member:text-emerald-600",
             chevronText: "text-emerald-500",
             gradientText: "text-emerald-600",
+            bgSoft: "bg-emerald-50 dark:bg-emerald-900/10",
         },
     }
 
@@ -82,11 +99,21 @@ export default function OrganizationContent({
 
     const sortedOrders = Object.keys(groupByOrder).sort((a, b) => Number(a) - Number(b))
 
+    const handleZoomIn = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setZoomLevel(prev => Math.min(prev + 0.5, 4)) 
+    }
+
+    const handleZoomOut = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setZoomLevel(prev => Math.max(prev - 0.5, 1))
+    }
+
     return (
         <section className="min-h-screen py-32 bg-gray-50 dark:bg-gray-950">
             <div className="container mx-auto px-6 md:px-12">
 
-                <div className="text-center mb-20 space-y-4" data-aos="fade-up">
+                <div className="text-center mb-16 space-y-4" data-aos="fade-up">
                     <div className="flex items-center justify-center gap-4">
                         <div className={`h-[2px] w-12 ${theme.line}`}></div>
                         <span className={`${theme.text} dark:${theme.text} text-sm font-bold tracking-[0.2em] uppercase`}>
@@ -98,6 +125,98 @@ export default function OrganizationContent({
                         {subtitle.split(' ').slice(0, -1).join(' ')} <span className={theme.gradientText}>{subtitle.split(' ').pop()}</span>
                     </h1>
                 </div>
+
+                {structureImageUrl && (
+                    <>
+                        <div className="max-w-5xl mx-auto mb-24" data-aos="fade-up" data-aos-delay="100">
+                            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <div className={`p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center gap-3 ${theme.bgSoft}`}>
+                                    <Network className={`w-5 h-5 ${theme.text}`} />
+                                    <h3 className={`text-lg font-bold uppercase tracking-widest ${theme.text}`}>
+                                        Bagan Struktur Visual
+                                    </h3>
+                                </div>
+                                
+                                <div 
+                                    className="p-4 md:p-8 bg-gray-50/50 dark:bg-gray-900/50 flex justify-center cursor-zoom-in group relative"
+                                    onClick={() => setIsLightboxOpen(true)}
+                                >
+                                    <img
+                                        src={structureImageUrl}
+                                        alt={`Bagan Struktur ${entityType}`}
+                                        className="w-full h-auto max-w-4xl object-contain rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-black transition-transform duration-300 group-hover:scale-[1.01]"
+                                        loading="lazy"
+                                    />
+                                    
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                        <div className="bg-black/60 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm flex items-center gap-2">
+                                            <ZoomIn className="w-4 h-4" /> Klik untuk memperbesar
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {isLightboxOpen && (
+                            <div 
+                                className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex flex-col animate-in fade-in duration-300"
+                                onClick={() => setIsLightboxOpen(false)} 
+                            >
+                                <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-50 bg-gradient-to-b from-black/50 to-transparent">
+                                    <div className="text-white/80 text-sm font-medium px-4">
+                                        {subtitle} - {entityType.toUpperCase()}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={handleZoomOut}
+                                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                                            title="Zoom Out"
+                                        >
+                                            <ZoomOut className="w-5 h-5" />
+                                        </button>
+                                        <span className="text-white text-xs font-mono w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
+                                        <button 
+                                            onClick={handleZoomIn}
+                                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                                            title="Zoom In"
+                                        >
+                                            <ZoomIn className="w-5 h-5" />
+                                        </button>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setZoomLevel(1); }}
+                                            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors ml-2"
+                                            title="Reset"
+                                        >
+                                            <RotateCcw className="w-5 h-5" />
+                                        </button>
+                                        <button 
+                                            onClick={() => setIsLightboxOpen(false)}
+                                            className="p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-100 hover:text-white transition-colors ml-4"
+                                            title="Close"
+                                        >
+                                            <X className="w-6 h-6" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 cursor-grab active:cursor-grabbing">
+                                    <img
+                                        src={structureImageUrl}
+                                        alt="Full View"
+                                        className="max-w-none transition-transform duration-200 ease-out origin-center shadow-2xl"
+                                        style={{ 
+                                            transform: `scale(${zoomLevel})`,
+                                            maxHeight: zoomLevel === 1 ? '90vh' : 'none',
+                                            maxWidth: zoomLevel === 1 ? '90vw' : 'none',
+                                        }}
+                                        onClick={(e) => e.stopPropagation()} 
+                                        draggable={false}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
 
                 <div className="max-w-5xl mx-auto space-y-12">
                     {sortedOrders.map((order, index) => {
@@ -137,11 +256,10 @@ export default function OrganizationContent({
                                     </div>
 
                                     <div className="p-6 md:p-8">
-                                        <div className={`grid gap-8 ${
-                                            Object.keys(subGroups).length === 1
+                                        <div className={`grid gap-8 ${Object.keys(subGroups).length === 1
                                                 ? "grid-cols-1"
                                                 : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                                        }`}>
+                                            }`}>
                                             {Object.keys(subGroups).map((subTitle) => (
                                                 <div key={subTitle} className="space-y-4">
                                                     {(subTitle !== "Pengurus" || Object.keys(subGroups).length > 1) && (

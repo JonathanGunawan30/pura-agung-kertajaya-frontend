@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import AOS from "aos"
 import "aos/dist/aos.css"
@@ -16,17 +16,56 @@ export interface AboutData {
     id: string
     title: string
     description: string
-    image_url: string
+    images: {
+        xs?: string
+        sm?: string
+        md?: string
+        lg?: string
+        xl?: string
+        "2xl"?: string
+        fhd?: string
+        thumb?: string
+        avatar?: string
+        blur?: string
+    }
     values: AboutValue[]
 }
 
 export default function AboutSectionPasraman({ initialData }: { initialData: AboutData | null }) {
+    const [screenSize, setScreenSize] = useState<string>("lg")
 
     useEffect(() => {
         AOS.init({ duration: 800, once: true })
+
+        const updateSize = () => {
+            const width = window.innerWidth
+            if (width < 480) setScreenSize("xs")
+            else if (width < 640) setScreenSize("sm")
+            else if (width < 768) setScreenSize("md")
+            else if (width < 1024) setScreenSize("lg")
+            else if (width < 1280) setScreenSize("xl")
+            else setScreenSize("2xl")
+        }
+
+        updateSize()
+        window.addEventListener("resize", updateSize)
+        return () => window.removeEventListener("resize", updateSize)
     }, [])
 
-    if (!initialData) return null;
+    if (!initialData) return null
+
+    const getResponsiveImageUrl = () => {
+        if (!initialData.images) return ""
+        const priority = [screenSize, "lg", "md", "sm", "fhd"]
+        for (const size of priority) {
+            const url = initialData.images[size as keyof typeof initialData.images]
+            if (url) return url
+        }
+        return Object.values(initialData.images).find(url => !!url && !url.includes('_blur')) || ""
+    }
+
+    const blurPlaceholder = initialData.images?.blur || ""
+    const mainImageUrl = getResponsiveImageUrl()
 
     return (
         <section id="about" className="relative py-20 md:py-28 bg-white dark:bg-gray-950 overflow-hidden">
@@ -73,10 +112,10 @@ export default function AboutSectionPasraman({ initialData }: { initialData: Abo
                             ))}
                         </div>
 
-                        <div className="pt-2">
+                        <div className="pt-2 flex justify-center lg:justify-start">
                             <Link
                                 href="/pasraman/about"
-                                className="group inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 dark:shadow-none text-sm md:text-base"
+                                className="group inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors text-sm md:text-base"
                             >
                                 Mengenal Lebih Dalam
                                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -89,10 +128,17 @@ export default function AboutSectionPasraman({ initialData }: { initialData: Abo
                         <div className="hidden md:block absolute -top-6 -right-6 w-32 h-32 border-t-4 border-r-4 border-emerald-600/30 rounded-tr-3xl -z-10"></div>
                         <div className="hidden md:block absolute -bottom-6 -left-6 w-32 h-32 border-b-4 border-l-4 border-emerald-600/30 rounded-bl-3xl -z-10"></div>
 
-                        <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border-4 md:border-[8px] border-white dark:border-gray-800 group">
+                        <div className="relative rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border-4 md:border-[8px] border-white dark:border-gray-800 group bg-gray-200 dark:bg-gray-900">
                             <img
-                                src={initialData.image_url}
+                                src={mainImageUrl}
                                 alt="Pasraman Kertajaya"
+                                loading="lazy"
+                                decoding="async"
+                                style={{
+                                    backgroundImage: blurPlaceholder ? `url(${blurPlaceholder})` : "none",
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center"
+                                }}
                                 className="w-full h-full object-cover aspect-[4/3] transform group-hover:scale-105 transition-transform duration-1000 ease-in-out"
                             />
                             <div className="absolute inset-0 bg-emerald-900/10 group-hover:bg-transparent transition-colors duration-500"></div>

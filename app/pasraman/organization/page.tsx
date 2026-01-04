@@ -1,15 +1,21 @@
-import { getOrganizationMembers } from "@/lib/api"
+import { getOrganizationMembers, getOrganizationDetails } from "@/lib/api"
 import OrganizationContent from "@/components/pages/organization-content"
 
-export default async function YayasanOrgPage() {
-    const data = await getOrganizationMembers("pasraman")
+export default async function PasramanOrgPage() {
+    const ENTITY_TYPE = "pasraman"
+
+    const [membersData, detailsData] = await Promise.all([
+        getOrganizationMembers(ENTITY_TYPE),
+        getOrganizationDetails(ENTITY_TYPE)
+    ])
     
     return (
         <OrganizationContent 
-            initialData={data} 
-            entityType="pasraman" 
+            initialData={membersData} 
+            entityType={ENTITY_TYPE} 
             title="Struktur Organisasi"
             subtitle="Pasraman Kertajaya"
+            structureImageUrl={detailsData?.structure_image_url}
         />
     )
 }

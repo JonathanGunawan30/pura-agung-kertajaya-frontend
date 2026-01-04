@@ -9,7 +9,9 @@ import {
     getHeroSlides,
     getSiteIdentity,
     getRemarks,
-    getOrganizationDetails
+    getOrganizationDetails,
+    getFeaturableReviews,
+    getArticlesData
 } from "@/lib/api"
 
 import HeroCarousel from "@/components/sections/hero-carousel"
@@ -18,20 +20,27 @@ import ActivityGallerySection from "@/components/sections/pasraman/gallery-secti
 import FacilitiesSectionPasraman from "@/components/sections/pasraman/facilities-section"
 import ContactSection from "@/components/sections/contact-section"
 import RemarksSection from "@/components/sections/remarks-section"
+import TestimonialsSection from "@/components/sections/testimonials-section";
+import ArticleSection from "@/components/sections/articles-section";
+import ActivitiesSection from "@/components/sections/activities-section";
 
 export default async function PasramanPage() {
     const ENTITY_TYPE = "pasraman"
 
     const [
-        aboutData, 
-        galleryData, 
-        activitiesData, 
+        aboutData,
+        galleryData,
+        activitiesData,
         facilitiesData,
-        contactData, 
-        heroSlides, 
+        contactData,
+        heroSlides,
         siteIdentity,
         remarksData,
-        organizationDetail
+        organizationDetail,
+        testimonialsData,
+        articlesData,
+        puraIdentity,
+        yayasanIdentity
     ] = await Promise.all([
         getAboutData(ENTITY_TYPE),
         getGalleryData(ENTITY_TYPE),
@@ -42,35 +51,51 @@ export default async function PasramanPage() {
         getSiteIdentity(ENTITY_TYPE),
         getRemarks(ENTITY_TYPE),
         getOrganizationDetails(ENTITY_TYPE),
+        getFeaturableReviews(),
+        getArticlesData(),
+        getSiteIdentity("pura"),
+        getSiteIdentity("yayasan")
     ])
+
+    const otherSites = [puraIdentity, yayasanIdentity].filter(Boolean)
 
     return (
         <main className="min-h-screen bg-emerald-50/20">
-            <HeroCarousel 
-                slides={heroSlides} 
-                site={siteIdentity} 
-                entityType={ENTITY_TYPE} 
+            <HeroCarousel
+                slides={heroSlides}
+                site={siteIdentity}
+                entityType={ENTITY_TYPE}
+                otherSites={otherSites}
             />
-            
+
             <AboutSectionPasraman initialData={aboutData} />
-            
-            <RemarksSection 
-                initialData={remarksData} 
+
+            <RemarksSection
+                initialData={remarksData}
                 entityType={ENTITY_TYPE}
                 title="Sambutan Kepala Pasraman"
             />
 
-            <FacilitiesSectionPasraman initialData={facilitiesData} />
-
-            <ActivityGallerySection 
-                initialData={galleryData} 
+            <ActivityGallerySection
+                initialData={galleryData}
                 entityType={ENTITY_TYPE}
                 title="Galeri Pendidikan"
                 subtitle="Dokumentasi Siswa"
                 description="Kumpulan momen proses belajar mengajar, praktik keagamaan, dan kreativitas siswa Pasraman Kertajaya."
             />
-            
-            <ContactSection initialData={contactData} entityType={ENTITY_TYPE}/>
+
+            <ArticleSection
+                initialData={articlesData}
+                entityType={ENTITY_TYPE}
+            />
+
+            <ActivitiesSection initialData={activitiesData} entityType={ENTITY_TYPE}/>
+
+            <FacilitiesSectionPasraman initialData={facilitiesData} />
+
+            <TestimonialsSection reviews={testimonialsData} entityType={ENTITY_TYPE} />
+
+            <ContactSection initialData={contactData} entityType={ENTITY_TYPE} />
         </main>
     )
 }

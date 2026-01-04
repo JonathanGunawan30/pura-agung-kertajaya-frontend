@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import AOS from "aos"
 import "aos/dist/aos.css"
@@ -16,17 +16,56 @@ export interface AboutData {
     id: string
     title: string
     description: string
-    image_url: string
+    images: {
+        xs?: string
+        sm?: string
+        md?: string
+        lg?: string
+        xl?: string
+        "2xl"?: string
+        fhd?: string
+        thumb?: string
+        avatar?: string
+        blur?: string
+    }
     values: AboutValue[]
 }
 
 export default function AboutSectionYayasan({ initialData }: { initialData: AboutData | null }) {
+    const [screenSize, setScreenSize] = useState<string>("lg")
 
     useEffect(() => {
         AOS.init({ duration: 800, once: true })
+
+        const updateSize = () => {
+            const width = window.innerWidth
+            if (width < 480) setScreenSize("xs")
+            else if (width < 640) setScreenSize("sm")
+            else if (width < 768) setScreenSize("md")
+            else if (width < 1024) setScreenSize("lg")
+            else if (width < 1280) setScreenSize("xl")
+            else setScreenSize("2xl")
+        }
+
+        updateSize()
+        window.addEventListener("resize", updateSize)
+        return () => window.removeEventListener("resize", updateSize)
     }, [])
 
-    if (!initialData) return null;
+    if (!initialData) return null
+
+    const getResponsiveImageUrl = () => {
+        if (!initialData.images) return ""
+        const priority = [screenSize, "lg", "md", "sm", "fhd"]
+        for (const size of priority) {
+            const url = initialData.images[size as keyof typeof initialData.images]
+            if (url) return url
+        }
+        return Object.values(initialData.images).find(url => !!url && !url.includes('_blur')) || ""
+    }
+
+    const blurPlaceholder = initialData.images?.blur || ""
+    const mainImageUrl = getResponsiveImageUrl()
 
     return (
         <section id="about" className="relative py-20 md:py-28 bg-white dark:bg-gray-950 overflow-hidden">
@@ -40,18 +79,27 @@ export default function AboutSectionYayasan({ initialData }: { initialData: Abou
                         
                         <div className="hidden md:block absolute top-0 right-0 w-full h-full transform translate-x-6 translate-y-6 rotate-3 -z-10">
                             <div className="w-full h-full rounded-2xl overflow-hidden opacity-50 grayscale border border-gray-200 dark:border-gray-800">
-                                <img
-                                    src={initialData.image_url}
-                                    className="w-full h-full object-cover"
-                                    alt="Background Layer"
+                                <div 
+                                    className="w-full h-full bg-cover bg-center"
+                                    style={{ 
+                                        backgroundImage: `url(${mainImageUrl})`,
+                                        filter: 'blur(4px)' 
+                                    }}
                                 />
                             </div>
                         </div>
 
-                        <div className="relative rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border-4 md:border-[6px] border-white dark:border-gray-800 group">
+                        <div className="relative rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border-4 md:border-[6px] border-white dark:border-gray-800 group bg-gray-200 dark:bg-gray-900">
                             <img
-                                src={initialData.image_url}
+                                src={mainImageUrl}
                                 alt="Yayasan Kertajaya"
+                                loading="lazy"
+                                decoding="async"
+                                style={{
+                                    backgroundImage: blurPlaceholder ? `url(${blurPlaceholder})` : "none",
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center"
+                                }}
                                 className="w-full h-full object-cover aspect-[4/3] transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60"></div>

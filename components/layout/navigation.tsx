@@ -117,14 +117,16 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
             className={`
                 fixed top-0 inset-x-0 z-50 transition-all duration-300
                 ${isSolid
-                    ? "bg-white/95 dark:bg-gray-950/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 py-3"
-                    : "bg-transparent py-6"
+                    ? "bg-white/95 dark:bg-gray-950/95 backdrop-blur-md shadow-sm border-b border-gray-200/50 dark:border-gray-800/50 py-2"
+                    : "bg-transparent py-4 md:py-6"
                 }
             `}
         >
             <div className="container mx-auto px-4 md:px-8">
                 <div className="flex items-center justify-between">
+                    
                     <Link href={`/${entityType === 'pura' ? '' : entityType}`} className="flex items-center gap-3 group min-w-0">
+                        
                         <div
                             className={`relative flex-shrink-0 flex items-center justify-center transition-all duration-300 ${isScrolled ? "w-10 h-10" : "w-12 h-12 md:w-14 md:h-14"
                                 }`}
@@ -143,13 +145,23 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
                             )}
                         </div>
 
-                        <span
-                            className={`hidden md:block font-bold transition-all duration-300 truncate ${isScrolled ? "text-lg" : "text-xl"
-                                } ${textColorClass}`}
-                        >
-                            {site?.site_name || (entityType === 'pura' ? "Pura Agung Kertajaya" : entityType === 'yayasan' ? "Yayasan Vidya Kertajaya" : "Pasraman Vidya Kertajaya")}
-                        </span>
+                        <div className="flex flex-col items-start justify-center min-w-0">
+                            
+                            <span
+                                className={`font-bold transition-all duration-300 truncate leading-tight ${isScrolled ? "text-base md:text-lg" : "text-lg md:text-xl"
+                                    } ${textColorClass}`}
+                            >
+                                {site?.site_name || (entityType === 'pura' ? "Pura Agung Kertajaya" : entityType === 'yayasan' ? "Yayasan Vidya Kertajaya" : "Pasraman Vidya Kertajaya")}
+                            </span>
+
+                            {(entityType === 'pura' || entityType === 'pasraman') && (
+                                <span className={`text-[9px] md:text-xs font-medium leading-tight tracking-wide opacity-80 uppercase mt-0.5 ${textColorClass}`}>
+                                    Yayasan Vidya Kertajaya
+                                </span>
+                            )}
+                        </div>
                     </Link>
+
 
                     <div className="hidden lg:flex items-center gap-8">
                         {navItems.map((item) => (
@@ -165,37 +177,6 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
                             </Link>
                         ))}
 
-                        <div 
-                            className="relative py-2"
-                            onMouseEnter={() => setIsDropdownHovered(true)}
-                            onMouseLeave={() => setIsDropdownHovered(false)}
-                        >
-                            <button
-                                className={`flex items-center gap-1 text-sm font-bold tracking-wide transition-colors ${textColorClass} hover:opacity-80`}
-                            >
-                                Lembaga Lain
-                                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isDropdownHovered ? 'rotate-180' : ''}`} />
-                            </button>
-                            
-                            <div className={`
-                                absolute top-full right-0 w-48 pt-4
-                                transition-all duration-200 origin-top-right
-                                ${isDropdownHovered ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible pointer-events-none'}
-                            `}>
-                                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden py-1">
-                                    {otherEntities.map((entity) => (
-                                        <Link
-                                            key={entity.href}
-                                            href={entity.href}
-                                            className={`flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 ${currentTheme.dropdownTextHover} transition-colors`}
-                                        >
-                                            <span>{entity.label}</span>
-                                            <ExternalLink className="w-3 h-3 opacity-50" />
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="flex items-center gap-4 flex-shrink-0">

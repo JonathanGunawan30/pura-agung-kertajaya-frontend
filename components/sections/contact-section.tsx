@@ -75,7 +75,7 @@ export default function ContactSection({
     const theme = themeConfig[entityType] || themeConfig.pura
 
     return (
-        <section id="contact" className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <section id="contact" className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-12 md:mb-16" data-aos="fade-up">
@@ -97,7 +97,7 @@ export default function ContactSection({
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
-                    <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-3xl md:rounded-[2rem] p-6 md:p-10 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700" data-aos="fade-right">
+                    <div className="lg:col-span-5 bg-white dark:bg-gray-800 rounded-3xl md:rounded-[2rem] p-6 md:p-10 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700" data-aos="fade-up">
 
                         <div className="flex gap-4 md:gap-5 mb-6 md:mb-8">
                             <div className={`shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${theme.iconBg} flex items-center justify-center ${theme.iconText}`}>
@@ -151,7 +151,7 @@ export default function ContactSection({
 
                     </div>
 
-                    <div className="lg:col-span-7 h-[350px] md:h-[450px] lg:h-full lg:min-h-[500px]" data-aos="fade-left" data-aos-delay="200">
+                    <div className="lg:col-span-7 h-[350px] md:h-[450px] lg:h-full lg:min-h-[500px]" data-aos="fade-up" data-aos-delay="200">
                         <div className="relative w-full h-full rounded-3xl md:rounded-[2rem] overflow-hidden shadow-2xl bg-gray-200 group">
 
                             <iframe
@@ -167,7 +167,7 @@ export default function ContactSection({
 
                             <div className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-auto md:right-8">
                                 <a
-                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(initialData.address)}`}
+                                    href={`https://www.google.com/maps/dir/?api=1&destination=pura agung kertajaya`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className={`

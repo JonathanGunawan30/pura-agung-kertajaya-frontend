@@ -4,15 +4,20 @@ import { useEffect, useState } from "react"
 import AOS from "aos"
 import "aos/dist/aos.css"
 import Link from "next/link"
-import { ArrowLeft, Target, CheckCircle2, Quote, GraduationCap, BookOpen } from "lucide-react"
+import { ArrowLeft, Target, CheckCircle2, Quote } from "lucide-react"
 
 type EntityType = "pura" | "yayasan" | "pasraman"
+
+export interface AboutImages {
+    xs?: string; sm?: string; md?: string; lg?: string; xl?: string;
+    "2xl"?: string; fhd?: string; blur?: string;
+}
 
 export interface AboutData {
     id: string
     title: string
     description: string
-    image_url: string
+    images: AboutImages
 }
 
 export interface OrganizationDetail {
@@ -44,6 +49,15 @@ export default function AboutContentPasraman({ data, orgDetail }: AboutContentPr
     if (!data) return null;
 
     const paragraphs = data.description.split("\n").filter(p => p.trim()) || []
+
+    const getHeroImageUrl = (imgs: AboutImages) => {
+        if (!imgs) return "";
+        return imgs.fhd || imgs["2xl"] || imgs.xl || imgs.lg || imgs.md || "";
+    }
+
+    const mainImageUrl = getHeroImageUrl(data.images);
+    
+    const fallbackOrgImage = data.images.lg || data.images.md || "";
 
     const renderFlexibleContent = (content: string | null) => {
         if (!content) return <p className="text-gray-500 italic text-lg">Belum ada data visi & misi untuk Pasraman.</p>;
@@ -99,12 +113,17 @@ export default function AboutContentPasraman({ data, orgDetail }: AboutContentPr
                 </div>
 
                 <div className="w-full flex justify-center mb-16" data-aos="zoom-in" data-aos-duration="1000">
-                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-emerald-900/10 border-4 border-white dark:border-gray-800 relative">
+                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-emerald-900/10 border-4 border-white dark:border-gray-800 relative bg-gray-100 dark:bg-gray-900">
                         <img
                             loading="lazy"
-                            src={data.image_url}
+                            src={mainImageUrl}
                             alt="Pasraman Kertajaya"
                             className="w-full h-full object-cover object-center"
+                            style={{ 
+                                backgroundImage: data.images.blur ? `url(${data.images.blur})` : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
                         />
                         <div className="absolute inset-0 bg-black/10"></div>
                     </div>
@@ -121,11 +140,12 @@ export default function AboutContentPasraman({ data, orgDetail }: AboutContentPr
                 {orgDetail && (
                     <div className="max-w-6xl mx-auto mb-24 space-y-32">
                         <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+                            
                             <div className="w-full lg:col-span-5 relative lg:sticky lg:top-32 order-2 lg:order-1" data-aos="fade-right">
                                 <div className="hidden md:block absolute inset-0 transform -translate-x-4 translate-y-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-[2.5rem] -z-10"></div>
-                                <div className="relative h-[400px] lg:h-[550px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
+                                <div className="relative h-[400px] lg:h-[550px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800 bg-gray-100 dark:bg-gray-900">
                                     <img 
-                                        src={orgDetail.vision_mission_image_url || data.image_url} 
+                                        src={orgDetail.vision_mission_image_url || fallbackOrgImage} 
                                         alt="Visi Misi Pasraman" 
                                         className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                                     />

@@ -7,12 +7,16 @@ import Link from "next/link"
 import { ArrowLeft, Target, CheckCircle2, Quote, Briefcase, ListTodo } from "lucide-react"
 
 type EntityType = "pura" | "yayasan" | "pasraman"
+export interface AboutImages {
+    xs?: string; sm?: string; md?: string; lg?: string; xl?: string;
+    "2xl"?: string; fhd?: string; blur?: string;
+}
 
 export interface AboutData {
     id: string
     title: string
     description: string
-    image_url: string
+    images: AboutImages
 }
 
 export interface OrganizationDetail {
@@ -44,6 +48,15 @@ export default function AboutContentYayasan({ data, orgDetail }: AboutContentPro
     if (!data) return null;
 
     const paragraphs = data.description.split("\n").filter(p => p.trim()) || []
+
+    const getHeroImageUrl = (imgs: AboutImages) => {
+        if (!imgs) return "";
+        return imgs.fhd || imgs["2xl"] || imgs.xl || imgs.lg || imgs.md || "";
+    }
+
+    const mainImageUrl = getHeroImageUrl(data.images);
+    const fallbackOrgImage = data.images.lg || data.images.md || "";
+
 
     const renderFlexibleContent = (content: string | null) => {
         if (!content) return <p className="text-gray-500 italic text-lg">Belum ada data.</p>;
@@ -99,12 +112,17 @@ export default function AboutContentYayasan({ data, orgDetail }: AboutContentPro
                 </div>
 
                 <div className="w-full flex justify-center mb-16" data-aos="zoom-in" data-aos-duration="1000">
-                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/10 border-4 border-white dark:border-gray-800 relative">
+                    <div className="w-full max-w-5xl h-[40vh] md:h-[60vh] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/10 border-4 border-white dark:border-gray-800 relative bg-gray-100 dark:bg-gray-900">
                         <img
                             loading="lazy"
-                            src={data.image_url}
+                            src={mainImageUrl}
                             alt="Yayasan Kertajaya"
                             className="w-full h-full object-cover object-center"
+                            style={{ 
+                                backgroundImage: data.images.blur ? `url(${data.images.blur})` : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
                         />
                         <div className="absolute inset-0 bg-black/10"></div>
                     </div>
@@ -127,7 +145,7 @@ export default function AboutContentYayasan({ data, orgDetail }: AboutContentPro
                                 <div className="hidden md:block absolute inset-0 transform -translate-x-4 translate-y-4 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] -z-10"></div>
                                 <div className="relative h-[400px] lg:h-[550px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
                                     <img 
-                                        src={orgDetail.vision_mission_image_url || data.image_url} 
+                                        src={orgDetail.vision_mission_image_url || fallbackOrgImage} 
                                         alt="Visi Misi Yayasan" 
                                         className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                                     />
@@ -210,8 +228,8 @@ export default function AboutContentYayasan({ data, orgDetail }: AboutContentPro
                                 <div className="relative group">
                                     <div className="hidden md:block absolute inset-0 transform translate-x-4 translate-y-4 bg-blue-50 dark:bg-blue-900/20 rounded-[2.5rem] -z-10"></div>
                                     <div className="relative h-[350px] md:h-[450px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-gray-800">
-                                        <img 
-                                            src={orgDetail.work_program_image_url || data.image_url} 
+                                        <img
+                                            src={orgDetail.work_program_image_url || fallbackOrgImage} 
                                             alt="Program Kerja Yayasan" 
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />

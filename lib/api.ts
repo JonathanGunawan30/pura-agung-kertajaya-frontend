@@ -81,3 +81,33 @@ export async function getOrganizationDetails(type: string){
     const json = await fetchData(`/api/public/organization-details?entity_type=${type}`);
     return json?.data || [];
 }
+
+export async function getFeaturableReviews() {
+    try {
+        const res = await fetch("https://featurable.com/api/v2/widgets/af21c3b9-e428-49bd-9ba8-de90b731316a", {
+            next: { revalidate: 3600 }
+        });
+
+        if (!res.ok) {
+            throw new Error(`Failed to fetch Featurable: ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        return json.widget?.reviews || [];
+    } catch (error) {
+        console.error("Error fetching Featurable reviews:", error);
+        return [];
+    }
+}
+
+export async function getArticlesData() {
+    const json = await fetchData(`/api/public/articles`);
+    return json?.data || [];
+}
+
+export async function getArticleBySlug(slug: string) {
+    const json = await fetchData(`/api/public/articles/${slug}`);
+    const data = json?.data;
+    return Array.isArray(data) ? data[0] : (data ?? null);
+}

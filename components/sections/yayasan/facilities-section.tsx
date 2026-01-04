@@ -216,7 +216,7 @@ export default function FacilitiesSection({ initialData, entityType }: Facilitie
                         )}
                     </div>
                 </div>
-                
+
                 <div className="lg:hidden flex flex-col gap-6" data-aos="fade-up">
                     <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl bg-gray-200 dark:bg-gray-800 border-4 border-white dark:border-gray-800">
                         {activeFacility && (

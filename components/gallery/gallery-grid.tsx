@@ -5,10 +5,19 @@ import { X, Search, ChevronLeft, ChevronRight, LayoutGrid, Grid as GridIcon, Arr
 import { Gallery } from "@/components/sections/gallery-section" 
 import Link from "next/link"
 
+interface GalleryImages {
+    xs?: string; sm?: string; md?: string; lg?: string; xl?: string;
+    "2xl"?: string; fhd?: string; blur?: string; avatar?: string;
+}
+
+type GalleryItem = Omit<Gallery, 'image_url'> & {
+    images: GalleryImages
+}
+
 type EntityType = "pura" | "yayasan" | "pasraman"
 
 interface GalleryGridProps {
-    items: Gallery[]
+    items: GalleryItem[]
     entityType: EntityType 
 }
 
@@ -21,6 +30,14 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
     const touchStart = useRef<number | null>(null)
     const touchEnd = useRef<number | null>(null)
 
+    const getImageUrl = (images: GalleryImages, mode: 'thumbnail' | 'full') => {
+        if (!images) return "";
+        if (mode === 'full') {
+            return images.fhd || images["2xl"] || images.xl || images.lg || images.md || "";
+        }
+        return images.md || images.lg || images.sm || images.xl || "";
+    }
+
     const themeConfig = {
         pura: {
             text: "text-orange-600",
@@ -28,7 +45,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
             shadow: "shadow-orange-500/10",
             hoverText: "hover:text-red-500",
             bgHover: "hover:bg-orange-500",
-            linkBack: "/pura"
+            linkBack: "/"
         },
         yayasan: {
             text: "text-blue-600",
@@ -94,7 +111,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
         if (distance < -50) handlePrev()
     }
 
-    const activeImage = selectedIndex !== null ? filteredItems[selectedIndex] : null
+    const activeItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 
     return (
         <div className="space-y-10">
@@ -165,25 +182,35 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                     ${mobileColumns === 1 ? 'grid-cols-1' : 'grid-cols-2'} 
                     sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4
                 `}>
-                    {filteredItems.map((item, idx) => (
-                        <div
-                            key={item.id}
-                            className="relative group rounded-2xl overflow-hidden cursor-pointer aspect-square bg-gray-100 dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300"
-                            onClick={() => setSelectedIndex(idx)}
-                        >
-                            <img
-                                src={item.image_url}
-                                alt={item.title}
-                                loading="lazy"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                <p className="text-white text-sm font-bold truncate">{item.title}</p>
-                                <p className="text-white/70 text-[10px] uppercase tracking-wider mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75">Lihat Foto</p>
+                    {filteredItems.map((item, idx) => {
+                        const thumbnailUrl = getImageUrl(item.images, 'thumbnail');
+                        const blurUrl = item.images.blur || "";
+
+                        return (
+                            <div
+                                key={item.id}
+                                className="relative group rounded-2xl overflow-hidden cursor-pointer aspect-square bg-gray-100 dark:bg-gray-800 shadow-sm hover:shadow-xl transition-all duration-300"
+                                onClick={() => setSelectedIndex(idx)}
+                            >
+                                <img
+                                    src={thumbnailUrl}
+                                    alt={item.title}
+                                    loading="lazy"
+                                    style={{ 
+                                        backgroundImage: blurUrl ? `url(${blurUrl})` : 'none',
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center'
+                                    }}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                    <p className="text-white text-sm font-bold truncate">{item.title}</p>
+                                    <p className="text-white/70 text-[10px] uppercase tracking-wider mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75">Lihat Foto</p>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
@@ -211,9 +238,9 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                 </Link>
             </div>
 
-            {activeImage && (
+            {activeItem && (
                 <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-sm animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black animate-in fade-in duration-300"
                     onClick={() => setSelectedIndex(null)}
                 >
                     <div
@@ -223,19 +250,25 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                         onTouchMove={onTouchMove}
                         onTouchEnd={onTouchEnd}
                     >
-                        <img src={activeImage.image_url} alt={activeImage.title} className="w-full h-auto max-h-[80vh] md:max-h-[85vh] object-contain md:rounded-sm shadow-2xl" />
+                        <img 
+                            src={getImageUrl(activeItem.images, 'full')} 
+                            alt={activeItem.title} 
+                            className="w-full h-auto max-h-[80vh] md:max-h-[85vh] object-contain md:rounded-sm shadow-2xl" 
+                        />
                     </div>
+                    
                     <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-6 md:px-12 pointer-events-none">
                         <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-end gap-4">
                             <div className="text-left space-y-2 pointer-events-auto">
-                                <h3 className="text-xl md:text-3xl font-bold text-white">{activeImage.title}</h3>
-                                <p className="text-gray-300 text-sm md:text-base max-w-2xl line-clamp-2 md:line-clamp-none">{activeImage.description}</p>
+                                <h3 className="text-xl md:text-3xl font-bold text-white">{activeItem.title}</h3>
+                                <p className="text-gray-300 text-sm md:text-base max-w-2xl line-clamp-2 md:line-clamp-none">{activeItem.description}</p>
                             </div>
                             <div className="text-white font-mono text-sm md:text-lg tracking-widest opacity-80 whitespace-nowrap">
                                 {selectedIndex! + 1} / {filteredItems.length}
                             </div>
                         </div>
                     </div>
+                    
                     <button onClick={(e) => { e.stopPropagation(); handlePrev() }} className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 active:scale-95 md:hover:scale-110 z-50"><ChevronLeft className="w-6 h-6 md:w-8 md:h-8" /></button>
                     <button onClick={(e) => { e.stopPropagation(); handleNext() }} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 active:scale-95 md:hover:scale-110 z-50"><ChevronRight className="w-6 h-6 md:w-8 md:h-8" /></button>
                     <button onClick={() => setSelectedIndex(null)} className="absolute top-4 right-4 md:top-6 md:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all border border-white/10 group z-50"><X className="w-6 h-6 group-hover:rotate-90 transition-transform" /></button>

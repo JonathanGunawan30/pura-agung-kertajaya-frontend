@@ -1,8 +1,9 @@
 'use client'
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { Mail, MapPin, Phone, ArrowRight } from "lucide-react"
+import { useMemo } from "react"
 
 interface FooterProps {
     site?: {
@@ -15,75 +16,83 @@ interface FooterProps {
         email?: string
     } | null
 }
+type EntityType = 'pura' | 'yayasan' | 'pasraman';
 
 export default function Footer({ site, contact }: FooterProps) {
     const pathname = usePathname()
+    const searchParams = useSearchParams()
     
-    const getColorClasses = () => {
-        if (pathname.startsWith('/yayasan')) {
-            return {
+    const activeEntity: EntityType = useMemo(() => {
+        const ref = searchParams.get('ref')
+        
+        if (ref === 'yayasan') return 'yayasan'
+        if (ref === 'pasraman') return 'pasraman'
+        if (ref === 'pura') return 'pura'
+
+        if (pathname.startsWith('/yayasan')) return 'yayasan'
+        if (pathname.startsWith('/pasraman')) return 'pasraman'
+        
+        return 'pura'
+    }, [pathname, searchParams])
+
+    const entityConfig = {
+        pura: {
+            colors: {
+                accent: 'bg-orange-600',
+                text: 'text-orange-600',
+                hover: 'hover:text-orange-600 dark:hover:text-orange-500',
+                iconText: 'text-orange-600'
+            },
+            explore: [
+                { name: "Beranda", href: "/" },
+                { name: "Tentang Kami", href: "/#about" },
+                { name: "Galeri Kegiatan", href: "/#gallery" },
+                { name: "Agenda & Jadwal", href: "/#activities" },
+                { name: "Fasilitas Pura", href: "/#facilities" },
+            ],
+            basePath: ''
+        },
+        yayasan: {
+            colors: {
                 accent: 'bg-blue-600',
                 text: 'text-blue-600',
                 hover: 'hover:text-blue-600 dark:hover:text-blue-500',
                 iconText: 'text-blue-600'
-            }
-        } else if (pathname.startsWith('/pasraman')) {
-            return {
-                accent: 'bg-green-600',
-                text: 'text-green-600',
-                hover: 'hover:text-green-600 dark:hover:text-green-500',
-                iconText: 'text-green-600'
-            }
-        }
-        return {
-            accent: 'bg-orange-600',
-            text: 'text-orange-600',
-            hover: 'hover:text-orange-600 dark:hover:text-orange-500',
-            iconText: 'text-orange-600'
-        }
-    }
-
-    const colors = getColorClasses()
-
-    const getExploreLinks = () => {
-        if (pathname.startsWith('/yayasan')) {
-            return [
+            },
+            explore: [
                 { name: "Beranda", href: "/yayasan" },
                 { name: "Tentang Kami", href: "/yayasan#about" },
                 { name: "Galeri Kegiatan", href: "/yayasan#gallery" },
                 { name: "Hubungi Kami", href: "/yayasan#contact" },
-            ]
-        } else if (pathname.startsWith('/pasraman')) {
-            return [
+            ],
+            basePath: '/yayasan'
+        },
+        pasraman: {
+            colors: {
+                accent: 'bg-green-600',
+                text: 'text-green-600',
+                hover: 'hover:text-green-600 dark:hover:text-green-500',
+                iconText: 'text-green-600'
+            },
+            explore: [
                 { name: "Beranda", href: "/pasraman" },
                 { name: "Tentang Kami", href: "/pasraman#about" },
                 { name: "Galeri Kegiatan", href: "/pasraman#gallery" },
                 { name: "Hubungi Kami", href: "/pasraman#contact" },
-            ]
+            ],
+            basePath: '/pasraman'
         }
-        return [
-            { name: "Beranda", href: "/" },
-            { name: "Tentang Kami", href: "/#about" },
-            { name: "Galeri Kegiatan", href: "/#gallery" },
-            { name: "Agenda & Jadwal", href: "/#activities" },
-            { name: "Fasilitas Pura", href: "/#facilities" },
-        ]
     }
 
-    const getInfoLinks = () => {
-        const basePrefix = pathname.startsWith('/yayasan') ? '/yayasan' : 
-                          pathname.startsWith('/pasraman') ? '/pasraman' : ''
-        
-        return [
-            { name: "Struktur Organisasi", href: `${basePrefix}/organization` },
-            { name: "Hubungi Kami", href: `${basePrefix}#contact` },
-            { name: "Kebijakan Privasi", href: "/privacy" },
-            { name: "Syarat & Ketentuan", href: "/terms" },
-        ]
-    }
+    const currentTheme = entityConfig[activeEntity]
+    const { colors, explore, basePath } = currentTheme
 
-    const exploreLinks = getExploreLinks()
-    const infoLinks = getInfoLinks()
+    const infoLinks = [
+        { name: "Struktur Organisasi", href: `${basePath}/organization` },
+        { name: "Hubungi Kami", href: `${basePath}/#contact` }, 
+        { name: "Kebijakan Privasi", href: "/privacy" },
+        { name: "Syarat & Ketentuan", href: "/terms" },
+    ]
 
     return (
         <footer className="bg-white dark:bg-gray-950 pt-20 pb-10 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
@@ -107,7 +116,7 @@ export default function Footer({ site, contact }: FooterProps) {
                             <span className={`w-8 h-[2px] ${colors.accent}`}></span> Jelajahi
                         </h4>
                         <ul className="space-y-3">
-                            {exploreLinks.map((link) => (
+                            {explore.map((link) => (
                                 <li key={link.name}>
                                     <Link href={link.href} className={`text-gray-500 dark:text-gray-400 ${colors.hover} transition-colors flex items-center gap-2 group text-sm`}>
                                         <ArrowRight className={`w-3 h-3 opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300 ${colors.text}`} />
