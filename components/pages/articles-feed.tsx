@@ -77,29 +77,33 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
         return () => window.removeEventListener("resize", updateSize)
     }, [])
 
-    const getThumbnailUrl = (images: ArticleImages) => {
-        if (!images) return ""
+    const getThumbnailUrl = (images: ArticleImages | undefined | null) => {
+        if (!images || typeof images !== 'object') return ""
         const priority = [screenSize, "lg", "md", "sm", "xs"]
         for (const size of priority) {
-            // @ts-ignore
             const url = images[size as keyof ArticleImages]
-            if (url) return url
+            if (url && typeof url === 'string') return url
         }
-        return Object.values(images).find(url => !!url && !url.includes('_blur')) || ""
+        return Object.values(images).find(url => !!url && typeof url === 'string' && !url.includes('_blur')) || ""
     }
 
+    // Filter out articles without valid images
+    const validItems = items.filter(item => 
+        item?.images && getThumbnailUrl(item.images) !== ""
+    )
+
     const filteredItems = useMemo(() => {
-        const filtered = items.filter(item =>
-            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.author_name.toLowerCase().includes(searchQuery.toLowerCase())
+        const filtered = validItems.filter(item =>
+            item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.author_name?.toLowerCase().includes(searchQuery.toLowerCase())
         )
         return filtered.sort((a, b) => {
             if (a.is_featured && !b.is_featured) return -1
             if (!a.is_featured && b.is_featured) return 1
             return new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
         })
-    }, [items, searchQuery])
+    }, [validItems, searchQuery])
 
     return (
         <div className="space-y-10 min-h-[60vh]">
@@ -155,7 +159,7 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
                 <div className={`grid gap-4 md:gap-8 transition-all duration-500 ${mobileColumns === 1 ? 'grid-cols-1' : 'grid-cols-2'} md:grid-cols-2 lg:grid-cols-3`}>
                     {filteredItems.map((article, idx) => {
                         const thumbUrl = getThumbnailUrl(article.images)
-                        const blurUrl = article.images.blur || ""
+                        const blurUrl = article.images?.blur || ""
 
                         return (
                             <Link 
@@ -179,8 +183,15 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
                                         )}
                                     </div>
                                     <img
-                                        src={thumbUrl} alt={article.title} loading="lazy" decoding="async"
-                                        style={{ backgroundImage: blurUrl ? `url(${blurUrl})` : "none", backgroundSize: "cover", backgroundPosition: "center" }}
+                                        src={thumbUrl} 
+                                        alt={article.title || "Article"} 
+                                        loading="lazy" 
+                                        decoding="async"
+                                        style={{ 
+                                            backgroundImage: blurUrl ? `url(${blurUrl})` : "none", 
+                                            backgroundSize: "cover", 
+                                            backgroundPosition: "center" 
+                                        }}
                                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
@@ -196,10 +207,10 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
                                         </div>
                                     </div>
                                     <h3 className={`font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 transition-colors ${theme.hoverText} ${mobileColumns === 2 ? 'text-sm md:text-xl' : 'text-xl'}`}>
-                                        {article.title}
+                                        {article.title || "Untitled"}
                                     </h3>
                                     <p className={`text-gray-600 dark:text-gray-400 text-sm flex-grow leading-relaxed ${mobileColumns === 2 ? 'hidden md:line-clamp-3 mb-0' : 'line-clamp-3 mb-6'}`}>
-                                        {article.excerpt}
+                                        {article.excerpt || ""}
                                     </p>
                                     <div className={`pt-6 mt-auto border-t border-gray-100 dark:border-gray-800 items-center gap-2 text-sm font-bold ${theme.text} ${mobileColumns === 2 ? 'hidden md:flex' : 'flex'}`}>
                                         Baca Selengkapnya <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -213,8 +224,10 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
                 <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400"><Search className="w-8 h-8" /></div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tidak ditemukan</h3>
-                    <p className="text-gray-500">Coba kata kunci lain untuk "{searchQuery}"</p>
-                    <button onClick={() => setSearchQuery("")} className={`mt-6 ${theme.text} font-semibold hover:underline`}>Hapus Pencarian</button>
+                    <p className="text-gray-500">Coba kata kunci lain{searchQuery ? ` untuk "${searchQuery}"` : ""}</p>
+                    {searchQuery && (
+                        <button onClick={() => setSearchQuery("")} className={`mt-6 ${theme.text} font-semibold hover:underline`}>Hapus Pencarian</button>
+                    )}
                 </div>
             )}
 

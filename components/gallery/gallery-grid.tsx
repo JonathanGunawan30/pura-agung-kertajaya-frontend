@@ -30,8 +30,8 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
     const touchStart = useRef<number | null>(null)
     const touchEnd = useRef<number | null>(null)
 
-    const getImageUrl = (images: GalleryImages, mode: 'thumbnail' | 'full') => {
-        if (!images) return "";
+    const getImageUrl = (images: GalleryImages | undefined | null, mode: 'thumbnail' | 'full') => {
+        if (!images || typeof images !== 'object') return "";
         if (mode === 'full') {
             return images.fhd || images["2xl"] || images.xl || images.lg || images.md || "";
         }
@@ -67,9 +67,11 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
 
     const theme = themeConfig[entityType] || themeConfig.pura
 
-    const filteredItems = items.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const validItems = items.filter(item => item?.images && (getImageUrl(item.images, 'thumbnail') !== ""))
+
+    const filteredItems = validItems.filter(item =>
+        item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
 
     useEffect(() => {
@@ -184,7 +186,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                 `}>
                     {filteredItems.map((item, idx) => {
                         const thumbnailUrl = getImageUrl(item.images, 'thumbnail');
-                        const blurUrl = item.images.blur || "";
+                        const blurUrl = item.images?.blur || "";
 
                         return (
                             <div
@@ -194,7 +196,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                             >
                                 <img
                                     src={thumbnailUrl}
-                                    alt={item.title}
+                                    alt={item.title || "Gallery image"}
                                     loading="lazy"
                                     style={{ 
                                         backgroundImage: blurUrl ? `url(${blurUrl})` : 'none',
@@ -205,7 +207,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                                 />
                                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                    <p className="text-white text-sm font-bold truncate">{item.title}</p>
+                                    <p className="text-white text-sm font-bold truncate">{item.title || "Untitled"}</p>
                                     <p className="text-white/70 text-[10px] uppercase tracking-wider mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity delay-75">Lihat Foto</p>
                                 </div>
                             </div>
@@ -218,13 +220,15 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                         <Search className="w-8 h-8" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tidak ditemukan</h3>
-                    <p className="text-gray-500">Coba kata kunci lain untuk "{searchQuery}"</p>
-                    <button
-                        onClick={() => setSearchQuery("")}
-                        className={`mt-6 ${theme.text} font-semibold hover:underline`}
-                    >
-                        Hapus Pencarian
-                    </button>
+                    <p className="text-gray-500">Coba kata kunci lain{searchQuery ? ` untuk "${searchQuery}"` : ""}</p>
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className={`mt-6 ${theme.text} font-semibold hover:underline`}
+                        >
+                            Hapus Pencarian
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -252,7 +256,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                     >
                         <img 
                             src={getImageUrl(activeItem.images, 'full')} 
-                            alt={activeItem.title} 
+                            alt={activeItem.title || "Gallery image"} 
                             className="w-full h-auto max-h-[80vh] md:max-h-[85vh] object-contain md:rounded-sm shadow-2xl" 
                         />
                     </div>
@@ -260,8 +264,8 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                     <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-24 pb-8 px-6 md:px-12 pointer-events-none">
                         <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-end gap-4">
                             <div className="text-left space-y-2 pointer-events-auto">
-                                <h3 className="text-xl md:text-3xl font-bold text-white">{activeItem.title}</h3>
-                                <p className="text-gray-300 text-sm md:text-base max-w-2xl line-clamp-2 md:line-clamp-none">{activeItem.description}</p>
+                                <h3 className="text-xl md:text-3xl font-bold text-white">{activeItem.title || "Untitled"}</h3>
+                                <p className="text-gray-300 text-sm md:text-base max-w-2xl line-clamp-2 md:line-clamp-none">{activeItem.description || ""}</p>
                             </div>
                             <div className="text-white font-mono text-sm md:text-lg tracking-widest opacity-80 whitespace-nowrap">
                                 {selectedIndex! + 1} / {filteredItems.length}
