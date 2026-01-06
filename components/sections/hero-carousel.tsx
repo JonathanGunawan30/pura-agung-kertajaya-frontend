@@ -49,19 +49,19 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
             overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
             btnPrimary: "bg-orange-600 hover:bg-orange-700 shadow-orange-600/30",
             indicatorActive: "bg-orange-500 w-8",
-            ring: "group-hover:border-orange-500/80 group-hover:shadow-orange-500/20"
+            ring: "group-hover:ring-4 group-hover:ring-orange-500/50"
         },
         yayasan: {
             overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
             btnPrimary: "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30",
             indicatorActive: "bg-blue-500 w-8",
-            ring: "group-hover:border-blue-500/80 group-hover:shadow-blue-500/20"
+            ring: "group-hover:ring-4 group-hover:ring-blue-500/50"
         },
         pasraman: {
             overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
             btnPrimary: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
             indicatorActive: "bg-emerald-500 w-8",
-            ring: "group-hover:border-emerald-500/80 group-hover:shadow-emerald-500/20"
+            ring: "group-hover:ring-4 group-hover:ring-emerald-500/50"
         },
     }
 
@@ -164,39 +164,41 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                 <div className="max-w-5xl w-full flex flex-col items-center justify-center h-full pt-16 md:pt-0">
                     
                     {otherSites.length > 0 && (
-                        <div className="animate-in fade-in slide-in-from-top-8 duration-1000 w-full mb-8 md:mb-12">
-                            <p className="text-white/80 text-[10px] md:text-xs font-bold tracking-[0.3em] uppercase mb-6 md:mb-8 drop-shadow-md">
+                        <div className="animate-in fade-in slide-in-from-top-8 duration-1000 w-full mb-8 md:mb-10">
+                            
+                            <p className="text-white text-[10px] md:text-xs font-extrabold tracking-[0.25em] uppercase mb-6 drop-shadow-md opacity-90">
                                 Kunjungi Lembaga Kami Lainnya
                             </p>
-                            <div className="flex flex-wrap justify-center gap-8 md:gap-16">
+                            
+                            <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
                                 {otherSites.map((item, idx) => (
                                     <Link 
                                         key={idx}
                                         href={getEntityLink(item.entity_type)}
-                                        className="group flex flex-col items-center gap-4"
+                                        className="group flex flex-col items-center gap-3 md:gap-4"
                                     >
                                         <div className={`
-                                            relative w-20 h-20 md:w-24 md:h-24 
+                                            relative 
+                                            w-20 h-20 md:w-28 md:h-28  /* Ukuran Mobile & Desktop Lebih Besar */
                                             rounded-full 
-                                            bg-white/10 border border-white/20 
-                                            backdrop-blur-sm  
-                                            flex items-center justify-center p-4 
-                                            transition-all duration-300 ease-out
-                                            group-hover:scale-110 group-hover:bg-white/20 
-                                            shadow-2xl ${theme.ring}
+                                            bg-white/80
+                                            flex items-center justify-center p-3 md:p-4
+                                            shadow-2xl transition-all duration-300 ease-out
+                                            group-hover:scale-110 group-hover:-translate-y-2
+                                            ${theme.ring} /* Efek Ring Warna Lembaga saat Hover */
                                         `}>
                                             {item.logo_url ? (
                                                 <img 
                                                     src={item.logo_url} 
                                                     alt={item.site_name} 
-                                                    className="w-full h-full object-contain drop-shadow-lg"
+                                                    className="w-full h-full object-contain drop-shadow-sm"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full rounded-full bg-white/20" /> 
+                                                <div className="w-full h-full rounded-full bg-gray-200" /> 
                                             )}
                                         </div>
                                         
-                                        <span className="text-white font-bold text-xs md:text-sm tracking-widest uppercase drop-shadow-lg group-hover:text-white transition-colors">
+                                        <span className="text-white font-bold text-[10px] md:text-sm tracking-widest uppercase drop-shadow-md group-hover:text-white/90 transition-colors">
                                             {getEntityLabel(item.entity_type)}
                                         </span>
                                     </Link>
@@ -237,14 +239,14 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                 </div>
             </div>
 
-            <button onClick={prevSlide} className="hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-14 h-14 items-center justify-center rounded-full bg-black/20 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white transition-all duration-300 group Arrows">
-                <ChevronLeft className="w-8 h-8 group-hover:-translate-x-1 transition-transform" />
+            <button onClick={prevSlide} className="hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/20 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white transition-all duration-300 group Arrows">
+                <ChevronLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             </button>
-            <button onClick={nextSlide} className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-14 h-14 items-center justify-center rounded-full bg-black/20 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white transition-all duration-300 group Arrows">
-                <ChevronRight className="w-8 h-8 group-hover:translate-x-1 transition-transform" />
+            <button onClick={nextSlide} className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 items-center justify-center rounded-full bg-black/20 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white transition-all duration-300 group Arrows">
+                <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            <div className="absolute bottom-8 md:bottom-12 z-30 flex items-center gap-3 left-1/2 -translate-x-1/2 Indicators">
+            <div className="absolute bottom-8 md:bottom-8 z-30 flex items-center gap-3 left-1/2 -translate-x-1/2 Indicators">
                 {slides.map((_, i) => (
                     <button
                         key={i}
