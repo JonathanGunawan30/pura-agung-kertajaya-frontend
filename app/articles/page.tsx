@@ -1,7 +1,8 @@
-import { getArticlesData, getSiteIdentity, getContactData } from "@/lib/api"; 
+import { getArticlesData, getSiteIdentity, getContactData, getHeroSlides } from "@/lib/api";
 import Navigation from "@/components/layout/navigation"; 
 import Footer from "@/components/layout/footer";
 import ArticlesFeed from "@/components/pages/articles-feed";
+import { Metadata } from "next";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -14,9 +15,41 @@ function determineEntity(refParam: string | undefined): "pasraman" | "yayasan" |
     return "pura"; 
 }
 
-export const metadata = {
-    title: 'Berita & Artikel | Pura Agung Kertajaya',
-    description: 'Kumpulan berita dan artikel terbaru.',
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+    const { ref } = await searchParams;
+    const refString = Array.isArray(ref) ? ref[0] : ref;
+    const currentEntityType = determineEntity(refString);
+
+    const [siteIdentity, heroSlides] = await Promise.all([
+        getSiteIdentity(currentEntityType),
+        getHeroSlides(currentEntityType)
+    ]);
+
+    let shareImage = siteIdentity?.logo_url || '/default-share.jpg';
+    if (heroSlides && Array.isArray(heroSlides) && heroSlides.length > 0) {
+        const sortedSlides = heroSlides.sort((a: any, b: any) => a.order_index - b.order_index);
+        const mainSlide = sortedSlides[0];
+        if (mainSlide.images && mainSlide.images['fhd']) {
+            shareImage = mainSlide.images['fhd'];
+        }
+    }
+
+    const siteName = siteIdentity?.site_name || "Pura Agung Kertajaya";
+
+    return {
+        title: `Berita & Artikel | ${siteName}`,
+        description: `Kumpulan berita, artikel, dan informasi terbaru dari ${siteName}.`,
+        openGraph: {
+            title: `Berita & Artikel - ${siteName}`,
+            description: `Simak kegiatan dan tulisan terbaru dari ${siteName}.`,
+            images: [{
+                url: shareImage,
+                width: 1200,
+                height: 630,
+                alt: siteName
+            }]
+        }
+    }
 }
 
 export default async function ArticlesPage({ searchParams }: Props) {
@@ -81,7 +114,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
                 </h1>
 
                 <p className="text-gray-600 dark:text-gray-400 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-                    Ikuti perkembangan terbaru kegiatan, pengumuman, dan wawasan penting dari kami.
+                    Ikuti perkembangan terbaru kegiatan, pengumuman, dan wawasan penting dari {siteIdentity?.site_name}.
                 </p>
             </div>
 

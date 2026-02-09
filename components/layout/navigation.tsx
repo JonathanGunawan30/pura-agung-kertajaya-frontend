@@ -147,7 +147,7 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
                                     ${isScrolled ? "text-base md:text-lg" : "text-lg md:text-xl"} 
                                     ${textColorClass}`}
                                 >
-                                    {site?.site_name || (entityType === 'pura' ? "Pura Agung Kertajaya" : entityType === 'yayasan' ? "Yayasan Vidya Kertajaya" : "Pasraman Vidya Kertajaya")}
+                                    {site?.site_name || (entityType === 'pura' ? "Pura Agung Kertajaya" : entityType === 'yayasan' ? "Yayasan Vidya Kertajaya" : "Pasraman Nonformal Kertajaya")}
                                 </span>
 
                                 {(entityType === 'pura' || entityType === 'pasraman') && (

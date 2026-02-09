@@ -16,13 +16,51 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
   
+  const baseUrl = process.env.BASE_URL 
+    ? new URL(process.env.BASE_URL) 
+    : new URL('https://puraagungkertajaya.my.id');
+
   if (!article) return { title: "Artikel Tidak Ditemukan" };
 
+  let shareImage = '/default-share.jpg';
+  if (article.images) {
+      const imgs = (typeof article.images === 'string') ? JSON.parse(article.images) : article.images;
+      shareImage = imgs.fhd || imgs['2xl'] || imgs.xl || imgs.lg || shareImage;
+  }
+  const description = article.excerpt 
+      ? (article.excerpt.length > 150 ? article.excerpt.substring(0, 150) + "..." : article.excerpt)
+      : "Baca artikel selengkapnya.";
+
   return {
+    metadataBase: baseUrl, 
+
     title: `${article.title} | Pura Agung Kertajaya`,
-    description: article.excerpt || "Baca artikel selengkapnya.",
+    description: description,
+
     openGraph: {
-        images: [article.images?.fhd || article.images?.lg || ""]
+        title: article.title,
+        description: description,
+
+        url: `/articles/${slug}`, 
+        
+        type: 'article',
+        publishedTime: article.published_at,
+        authors: [article.author_name || 'Admin'],
+        section: article.category?.name || 'Berita',
+        images: [
+            {
+                url: shareImage,
+                width: 1200,
+                height: 630,
+                alt: article.title,
+            }
+        ]
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: article.title,
+        description: description,
+        images: [shareImage],
     }
   };
 }

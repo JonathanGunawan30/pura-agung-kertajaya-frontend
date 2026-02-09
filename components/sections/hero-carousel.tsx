@@ -166,7 +166,7 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                     {otherSites.length > 0 && (
                         <div className="animate-in fade-in slide-in-from-top-8 duration-1000 w-full mb-8 md:mb-10">
                             
-                            <p className="text-white text-[10px] md:text-xs font-extrabold tracking-[0.25em] uppercase mb-6 drop-shadow-md opacity-90">
+                            <p className="text-white text-[10px] md:text-xs font-extrabold tracking-[0.25em] uppercase mb-6 drop-shadow-md">
                                 Kunjungi Lembaga Kami Lainnya
                             </p>
                             
@@ -179,13 +179,13 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                                     >
                                         <div className={`
                                             relative 
-                                            w-20 h-20 md:w-28 md:h-28  /* Ukuran Mobile & Desktop Lebih Besar */
+                                            w-20 h-20 md:w-28 md:h-28
                                             rounded-full 
                                             bg-white/80
                                             flex items-center justify-center p-3 md:p-4
                                             shadow-2xl transition-all duration-300 ease-out
                                             group-hover:scale-110 group-hover:-translate-y-2
-                                            ${theme.ring} /* Efek Ring Warna Lembaga saat Hover */
+                                            ${theme.ring}
                                         `}>
                                             {item.logo_url ? (
                                                 <img 
@@ -212,7 +212,7 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                             {getAdjustedSiteName()}
                         </h1>
                         
-                        <p className="text-base md:text-xl lg:text-2xl text-gray-100 font-normal max-w-3xl mx-auto leading-relaxed drop-shadow-lg opacity-90">
+                        <p className="text-base md:text-xl lg:text-2xl text-gray-100 font-normal max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
                             {site.tagline}
                         </p>
 
