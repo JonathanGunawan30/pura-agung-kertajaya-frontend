@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 
@@ -22,6 +23,7 @@ export default function RootLayout({
                 <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
                     {children}
                 </ThemeProvider>
+                <Analytics />
             </body>
         </html>
     )
