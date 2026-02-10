@@ -75,7 +75,7 @@ export default function ContactSection({
     const theme = themeConfig[entityType] || themeConfig.pura
 
     return (
-        <section id="contact" className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden">
+        <section id="contact" className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 mb-12 md:mb-16" data-aos="fade-up">

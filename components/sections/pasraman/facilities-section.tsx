@@ -100,7 +100,7 @@ export default function FacilitiesSectionPasraman({ initialData }: FacilitiesSec
     if (!initialData || initialData.length === 0) return null
 
     return (
-        <section id="facilities" className="py-24 bg-white dark:bg-gray-950 overflow-hidden">
+        <section id="facilities" className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
             <div className="container mx-auto px-6 md:px-12">
                 
                 <div className="flex flex-col items-center text-center mb-16 space-y-4" data-aos="fade-up">

@@ -42,23 +42,22 @@ interface HeroCarouselProps {
 
 export default function HeroCarousel({ slides = [], site, entityType = "pura", otherSites = [] }: HeroCarouselProps) {
     const [currentSlide, setCurrentSlide] = useState<number>(0)
-    const [screenSize, setScreenSize] = useState<string>("lg")
 
     const themeConfig = {
         pura: {
-            overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
+            overlay: "bg-gradient-to-b from-black/80 via-black/30 to-black/90",
             btnPrimary: "bg-orange-600 hover:bg-orange-700 shadow-orange-600/30",
             indicatorActive: "bg-orange-500 w-8",
             ring: "group-hover:ring-4 group-hover:ring-orange-500/50"
         },
         yayasan: {
-            overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
+            overlay: "bg-gradient-to-b from-black/80 via-black/30 to-black/90",
             btnPrimary: "bg-blue-600 hover:bg-blue-700 shadow-blue-600/30",
             indicatorActive: "bg-blue-500 w-8",
             ring: "group-hover:ring-4 group-hover:ring-blue-500/50"
         },
         pasraman: {
-            overlay: "bg-gradient-to-b from-black/70 via-black/20 to-black/80",
+            overlay: "bg-gradient-to-b from-black/80 via-black/30 to-black/90",
             btnPrimary: "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30",
             indicatorActive: "bg-emerald-500 w-8",
             ring: "group-hover:ring-4 group-hover:ring-emerald-500/50"
@@ -68,38 +67,12 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
     const theme = themeConfig[entityType] || themeConfig.pura
 
     useEffect(() => {
-        const updateSize = () => {
-            const width = window.innerWidth
-            if (width < 480) setScreenSize("xs")
-            else if (width < 640) setScreenSize("sm")
-            else if (width < 768) setScreenSize("md")
-            else if (width < 1024) setScreenSize("lg")
-            else if (width < 1280) setScreenSize("xl")
-            else if (width < 1536) setScreenSize("2xl")
-            else setScreenSize("fhd")
-        }
-        updateSize()
-        window.addEventListener("resize", updateSize)
-        return () => window.removeEventListener("resize", updateSize)
-    }, [])
-
-    useEffect(() => {
         if (slides.length === 0) return
         const interval = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length)
         }, 6000)
         return () => clearInterval(interval)
     }, [slides.length])
-
-    const getResponsiveImageUrl = (slide: HeroSlide) => {
-        const priority = [screenSize, "fhd", "2xl", "xl", "lg", "md", "sm", "xs"]
-        for (const size of priority) {
-            // @ts-ignore
-            const url = slide.images[size as keyof typeof slide.images]
-            if (url) return url
-        }
-        return Object.values(slide.images).find(url => !!url && !url.includes('_blur')) || ""
-    }
 
     const getAdjustedSiteName = () => {
         if (!site) return ""
@@ -127,78 +100,86 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
     if (slides.length === 0 || !site) return null
 
     return (
-        <section id="home" className="relative h-screen w-full overflow-hidden bg-black">
+        <section id="home" className="relative h-[100dvh] w-full overflow-hidden bg-black">
             <div className="absolute inset-0">
                 {slides.map((slide, i) => {
-                    const blurUrl = slide.images.blur || ""
-                    const mainUrl = getResponsiveImageUrl(slide)
+                    const defaultImg = slide.images.lg || slide.images.md || "";
+                    const blurUrl = slide.images.blur || "";
 
                     return (
-                        <div 
-                            key={slide.id} 
+                        <div
+                            key={slide.id}
                             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
                                 i === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
                             }`}
                         >
                             <div className={`absolute inset-0 z-20 ${theme.overlay}`} />
-                            <img
-                                src={mainUrl}
-                                alt=""
-                                loading={i === 0 ? "eager" : "lazy"}
-                                decoding="async"
-                                style={{
-                                    backgroundImage: blurUrl ? `url(${blurUrl})` : "none",
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center"
-                                }}
-                                className={`absolute inset-0 w-full h-full object-cover transition-transform ease-linear ${
-                                    i === currentSlide ? "scale-110 duration-[10000ms]" : "scale-100 duration-0"
-                                }`}
-                            />
+
+                            <picture>
+                                <source media="(min-width: 1536px)" srcSet={slide.images["2xl"] || slide.images.fhd} />
+                                <source media="(min-width: 1280px)" srcSet={slide.images.xl || slide.images["2xl"] || slide.images.lg} />
+                                <source media="(min-width: 1024px)" srcSet={slide.images.lg || slide.images.xl} />
+                                <source media="(min-width: 768px)" srcSet={slide.images.lg || slide.images.md} />
+                                <img
+                                    src={slide.images.md || slide.images.sm || defaultImg}
+                                    alt="Hero Slide"
+                                    loading={i === 0 ? "eager" : "lazy"}
+                                    // @ts-ignore
+                                    fetchPriority={i === 0 ? "high" : "low"}
+                                    style={{
+                                        backgroundImage: blurUrl ? `url(${blurUrl})` : "none",
+                                        backgroundSize: "cover",
+                                        backgroundPosition: "center"
+                                    }}
+                                    className={`absolute inset-0 w-full h-full object-cover transition-transform ease-linear ${
+                                        i === currentSlide ? "scale-110 duration-[10000ms]" : "scale-100 duration-0"
+                                    }`}
+                                />
+                            </picture>
                         </div>
                     )
                 })}
             </div>
 
             <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4 md:px-12">
-                <div className="max-w-5xl w-full flex flex-col items-center justify-center h-full pt-16 md:pt-0">
-                    
+                <div className="max-w-5xl w-full flex flex-col items-center justify-center h-full pt-10 xs:pt-16 md:pt-0 pb-8 xs:pb-12 md:pb-0 px-2 sm:px-0">
+
                     {otherSites.length > 0 && (
-                        <div className="animate-in fade-in slide-in-from-top-8 duration-1000 w-full mb-8 md:mb-10">
-                            
-                            <p className="text-white text-[10px] md:text-xs font-extrabold tracking-[0.25em] uppercase mb-6 drop-shadow-md">
+                        <div className="animate-in fade-in slide-in-from-top-8 duration-1000 w-full mb-3 xs:mb-4 sm:mb-8 md:mb-10">
+                            <p className="text-white text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs font-extrabold tracking-[0.2em] xs:tracking-[0.25em] uppercase mb-3 xs:mb-4 sm:mb-6 drop-shadow-md opacity-90">
                                 Kunjungi Lembaga Kami Lainnya
                             </p>
-                            
-                            <div className="flex flex-wrap justify-center gap-8 md:gap-12 items-center">
+
+                            <div className="flex flex-wrap justify-center gap-3 xs:gap-4 sm:gap-8 md:gap-12 items-center">
                                 {otherSites.map((item, idx) => (
-                                    <Link 
+                                    <Link
                                         key={idx}
                                         href={getEntityLink(item.entity_type)}
-                                        className="group flex flex-col items-center gap-3 md:gap-4"
+                                        className="group flex flex-col items-center gap-1.5 xs:gap-2 sm:gap-3 md:gap-4 active:scale-95 transition-transform"
                                     >
                                         <div className={`
                                             relative 
-                                            w-20 h-20 md:w-28 md:h-28
+                                            /* Mobile First: Default untuk iPhone 5/SE (40px), scale up untuk HP normal (48px) */
+                                            w-10 h-10 xs:w-12 xs:h-12 sm:w-16 sm:h-16 md:w-28 md:h-28
                                             rounded-full 
-                                            bg-white/80
-                                            flex items-center justify-center p-3 md:p-4
+                                            bg-white/90 backdrop-blur-sm
+                                            flex items-center justify-center p-1.5 xs:p-2 sm:p-3 md:p-4
                                             shadow-2xl transition-all duration-300 ease-out
                                             group-hover:scale-110 group-hover:-translate-y-2
                                             ${theme.ring}
                                         `}>
                                             {item.logo_url ? (
-                                                <img 
-                                                    src={item.logo_url} 
-                                                    alt={item.site_name} 
+                                                <img
+                                                    src={item.logo_url}
+                                                    alt={item.site_name}
                                                     className="w-full h-full object-contain drop-shadow-sm"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full rounded-full bg-gray-200" /> 
+                                                <div className="w-full h-full rounded-full bg-gray-200" />
                                             )}
                                         </div>
-                                        
-                                        <span className="text-white font-bold text-[10px] md:text-sm tracking-widest uppercase drop-shadow-md group-hover:text-white/90 transition-colors">
+
+                                        <span className="text-white font-bold text-[7px] xs:text-[9px] sm:text-[10px] md:text-sm tracking-wider xs:tracking-widest uppercase drop-shadow-md group-hover:text-white/90 transition-colors">
                                             {getEntityLabel(item.entity_type)}
                                         </span>
                                     </Link>
@@ -207,28 +188,28 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                         </div>
                     )}
 
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                        <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold text-white leading-tight drop-shadow-2xl">
+                    <div className="space-y-3 xs:space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 w-full px-2">
+                        <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white leading-tight drop-shadow-2xl">
                             {getAdjustedSiteName()}
                         </h1>
-                        
-                        <p className="text-base md:text-xl lg:text-2xl text-gray-100 font-normal max-w-3xl mx-auto leading-relaxed drop-shadow-lg">
+
+                        <p className="text-xs xs:text-sm sm:text-base md:text-xl lg:text-2xl text-gray-100 font-normal max-w-3xl mx-auto leading-snug xs:leading-relaxed drop-shadow-lg px-2">
                             {site.tagline}
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-6 justify-center">
+                        <div className="flex flex-col sm:flex-row gap-2.5 xs:gap-3 sm:gap-4 pt-3.5 xs:pt-4 sm:pt-6 justify-center w-full sm:w-auto px-4 xs:px-6 sm:px-0">
                             <a
                                 href={site.primary_button_link}
-                                className={`group px-10 py-4 text-white font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-xl flex items-center justify-center gap-2 CTA-Button ${theme.btnPrimary}`}
+                                className={`group w-full sm:w-auto px-5 xs:px-6 sm:px-10 py-2.5 xs:py-3 sm:py-4 text-xs xs:text-sm sm:text-base text-white font-bold rounded-full transition-all duration-300 hover:scale-105 shadow-xl flex items-center justify-center gap-2 CTA-Button ${theme.btnPrimary}`}
                             >
                                 {site.primary_button_text}
-                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                             </a>
 
                             {site.secondary_button_text && (
                                 <a
                                     href={site.secondary_button_link}
-                                    className="CTA-Button-Secondary px-10 py-4 bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md text-white font-bold rounded-full transition-all duration-300 hover:scale-105 text-center shadow-lg"
+                                    className="CTA-Button-Secondary w-full sm:w-auto px-5 xs:px-6 sm:px-10 py-2.5 xs:py-3 sm:py-4 text-xs xs:text-sm sm:text-base bg-white/10 hover:bg-white/20 border border-white/30 backdrop-blur-md text-white font-bold rounded-full transition-all duration-300 hover:scale-105 text-center shadow-lg"
                                 >
                                     {site.secondary_button_text}
                                 </a>
@@ -246,15 +227,15 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                 <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            <div className="absolute bottom-8 md:bottom-8 z-30 flex items-center gap-3 left-1/2 -translate-x-1/2 Indicators">
+            <div className="absolute bottom-4 xs:bottom-6 sm:bottom-8 z-30 flex items-center gap-1.5 xs:gap-2 sm:gap-3 left-1/2 -translate-x-1/2 Indicators">
                 {slides.map((_, i) => (
                     <button
                         key={i}
                         onClick={() => setCurrentSlide(i)}
-                        className={`h-1.5 md:h-2 rounded-full transition-all duration-500 shadow-md ${
-                            i === currentSlide 
-                                ? theme.indicatorActive 
-                                : "w-2.5 bg-white/30 hover:bg-white/60"
+                        className={`h-1 xs:h-1.5 md:h-2 rounded-full transition-all duration-500 shadow-md ${
+                            i === currentSlide
+                                ? theme.indicatorActive
+                                : "w-2 xs:w-2.5 bg-white/30 hover:bg-white/60"
                         }`}
                         aria-label={`Go to slide ${i + 1}`}
                     />

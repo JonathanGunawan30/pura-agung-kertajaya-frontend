@@ -318,7 +318,7 @@ export default function TestimonialsSection({ reviews, entityType }: Testimonial
     }
 
     return (
-        <section className="py-24 bg-gray-50 dark:bg-gray-950 relative border-t border-gray-100 dark:border-gray-800 w-full max-w-[100vw] overflow-hidden">
+        <section className="py-24 bg-white dark:bg-gray-950 relative w-full max-w-[100vw] overflow-hidden">
             <div className="container mx-auto px-6 md:px-12 relative z-10 mb-8 md:mb-12">
                 <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8" data-aos="fade-up">
                     <div className="space-y-4 max-w-2xl">

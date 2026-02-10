@@ -38,7 +38,7 @@ export default function ActivitiesSection({ initialData, entityType = "pura" }: 
     if (!initialData) return null;
 
     return (
-        <section id="activities" className="py-24 bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-900">
+        <section id="activities" className="py-24 bg-white dark:bg-black">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16" data-aos="fade-up">
