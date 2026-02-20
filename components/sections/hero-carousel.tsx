@@ -131,7 +131,7 @@ export default function HeroCarousel({ slides = [], site, entityType = "pura", o
                                         backgroundSize: "cover",
                                         backgroundPosition: "center"
                                     }}
-                                    className={`absolute inset-0 w-full h-full object-cover transition-transform ease-linear ${
+                                    className={`absolute inset-0 w-full h-full object-cover transition-transform ease-linear transform-gpu will-change-transform ${
                                         i === currentSlide ? "scale-110 duration-[10000ms]" : "scale-100 duration-0"
                                     }`}
                                 />

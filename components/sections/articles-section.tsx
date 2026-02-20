@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import { ArrowRight, Calendar, User, Star } from "lucide-react"
 
 export interface Article {
@@ -68,7 +66,7 @@ export default function ArticleSection({ initialData, entityType = "pura" }: Art
     const theme = themeConfig[entityType] || themeConfig.pura
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
         
         const updateSize = () => {
             const width = window.innerWidth
@@ -81,7 +79,7 @@ export default function ArticleSection({ initialData, entityType = "pura" }: Art
         }
         
         updateSize()
-        window.addEventListener("resize", updateSize)
+        window.addEventListener("resize", updateSize, { passive: true })
         return () => window.removeEventListener("resize", updateSize)
     }, [])
 
@@ -232,3 +230,5 @@ export default function ArticleSection({ initialData, entityType = "pura" }: Art
         </section>
     )
 }
+
+

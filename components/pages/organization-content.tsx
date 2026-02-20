@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { User, ChevronDown, Network, ZoomIn, X, ZoomOut, RotateCcw } from "lucide-react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 
 export interface Member {
     id: string
@@ -35,7 +33,7 @@ export default function OrganizationContent({
     const [zoomLevel, setZoomLevel] = useState(1)
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
     }, [])
 
     useEffect(() => {
@@ -110,7 +108,7 @@ export default function OrganizationContent({
     }
 
     return (
-        <section className="min-h-screen py-32 bg-gray-50 dark:bg-gray-950">
+        <section id="organization" className="min-h-[100dvh] py-32 bg-gray-50 dark:bg-gray-950">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="text-center mb-16 space-y-4" data-aos="fade-up">
@@ -311,3 +309,4 @@ export default function OrganizationContent({
         </section>
     )
 }
+

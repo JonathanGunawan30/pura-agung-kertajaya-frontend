@@ -13,7 +13,7 @@ export default async function TermsPage() {
     const lastUpdated = "10 Desember 2025"
 
     return (
-        <section className="min-h-screen py-24 bg-gray-50 dark:bg-gray-950">
+        <section className="min-h-[100dvh] py-24 bg-gray-50 dark:bg-gray-950">
             <div className="container mx-auto px-6 md:px-12 max-w-4xl">
 
                 <div className="text-center mb-16">

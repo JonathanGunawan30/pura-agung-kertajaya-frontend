@@ -73,7 +73,7 @@ export default function ArticlesFeed({ items, entityType = "pura" }: ArticlesFee
             else setScreenSize("2xl")
         }
         updateSize()
-        window.addEventListener("resize", updateSize)
+        window.addEventListener("resize", updateSize, { passive: true })
         return () => window.removeEventListener("resize", updateSize)
     }, [])
 

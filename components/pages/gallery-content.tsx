@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import GalleryGrid from "@/components/gallery/gallery-grid"
 import { Gallery } from "@/components/sections/gallery-section"
 
@@ -16,7 +14,7 @@ interface GalleryContentProps {
 export default function GalleryContent({ initialData, entityType }: GalleryContentProps) {
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
     }, [])
 
     const themeConfig = {
@@ -40,7 +38,7 @@ export default function GalleryContent({ initialData, entityType }: GalleryConte
     const theme = themeConfig[entityType] || themeConfig.pura
 
     return (
-        <section className="min-h-screen bg-white dark:bg-gray-950 pt-32 pb-20 overflow-x-hidden">
+        <section id="gallery" className="min-h-[100dvh] bg-white dark:bg-gray-950 pt-32 pb-20 overflow-x-hidden">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="text-center max-w-4xl mx-auto mb-16 space-y-6">
@@ -68,3 +66,4 @@ export default function GalleryContent({ initialData, entityType }: GalleryConte
         </section>
     )
 }
+

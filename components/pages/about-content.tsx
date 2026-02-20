@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 interface AboutImages {
@@ -24,7 +22,7 @@ interface AboutContentProps {
 export default function AboutContent({ data }: AboutContentProps) {
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
     }, [])
 
     if (!data) return null;
@@ -40,7 +38,7 @@ export default function AboutContent({ data }: AboutContentProps) {
     const blurUrl = data.images.blur || "";
 
     return (
-        <section className="pt-32 pb-20 bg-white dark:bg-gray-950 overflow-hidden min-h-screen">
+        <section id="about" className="pt-32 pb-20 bg-white dark:bg-gray-950 overflow-hidden min-h-[100dvh]">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="text-center max-w-4xl mx-auto mb-12 space-y-6">
@@ -104,3 +102,4 @@ export default function AboutContent({ data }: AboutContentProps) {
         </section>
     )
 }
+

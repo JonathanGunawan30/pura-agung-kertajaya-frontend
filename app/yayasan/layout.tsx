@@ -70,7 +70,7 @@ export default async function YayasanLayout({
         <>
             <Navigation site={fixedSiteIdentity} entityType="yayasan" />
             
-            <main className="min-h-screen">
+            <main className="min-h-[100dvh]">
                 {children}
             </main>
             <Footer site={siteIdentity} contact={contactData} />

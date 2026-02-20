@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Quote, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 
 export interface Remark {
     id: string
@@ -61,7 +59,7 @@ export default function RemarksSection({
     const activeRemark = initialData[activeIndex]
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
     }, [])
 
     useEffect(() => {
@@ -205,3 +203,4 @@ export default function RemarksSection({
         </section>
     )
 }
+

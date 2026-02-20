@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from "react"
 import { X, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import Link from "next/link"
 
 export interface Gallery {
@@ -46,7 +44,6 @@ export default function ActivityGallerySection({
     const displayData = initialData?.slice(0, 6) || []
 
     useEffect(() => {
-        AOS.init({ duration: 700, once: true })
         const updateSize = () => {
             const width = window.innerWidth
             if (width < 640) setScreenSize("xs")
@@ -54,7 +51,7 @@ export default function ActivityGallerySection({
             else setScreenSize("lg")
         }
         updateSize()
-        window.addEventListener("resize", updateSize)
+        window.addEventListener("resize", updateSize, { passive: true })
         return () => window.removeEventListener("resize", updateSize)
     }, [])
 
@@ -102,13 +99,17 @@ export default function ActivityGallerySection({
     }
 
     const handleScroll = () => {
-        if (scrollContainerRef.current) {
-            const container = scrollContainerRef.current
-            const { scrollLeft, clientWidth } = container
-            const itemWidth = clientWidth * 0.85
-            const newIndex = Math.round(scrollLeft / itemWidth)
-            setActiveIndex(Math.min(Math.max(newIndex, 0), displayData.length - 1))
-        }
+        if (!scrollContainerRef.current) return;
+        const container = scrollContainerRef.current;
+        const { scrollLeft, clientWidth } = container;
+        
+        window.requestAnimationFrame(() => {
+            const itemWidth = clientWidth * 0.85;
+            const newIndex = Math.round(scrollLeft / itemWidth);
+            const clampedIndex = Math.min(Math.max(newIndex, 0), displayData.length - 1);
+            
+            setActiveIndex((prev) => prev !== clampedIndex ? clampedIndex : prev);
+        });
     }
 
     const handlePrev = useCallback(() => {
@@ -137,7 +138,7 @@ export default function ActivityGallerySection({
     const activeImage = selectedIndex !== null ? initialData[selectedIndex] : null
 
     return (
-        <section id="activities" className="py-24 bg-white dark:bg-black overflow-hidden transition-colors duration-500">
+        <section id="gallery" className="py-24 bg-white dark:bg-black overflow-hidden transition-colors duration-500">
             <div className="container mx-auto px-6 md:px-12">
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12" data-aos="fade-up">
@@ -161,9 +162,10 @@ export default function ActivityGallerySection({
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
                     className="
-                        flex flex-nowrap overflow-x-auto overflow-y-hidden snap-x snap-mandatory gap-4 pb-8 -mx-6 px-6
+                        flex flex-nowrap overflow-x-auto overflow-y-hidden gap-4 pb-8 -mx-6 px-6
                         md:grid md:grid-cols-4 md:gap-4 md:pb-0 md:mx-0 md:px-0 md:overflow-visible
                         [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+                        touch-action-pan-x overscroll-behavior-x-auto
                     "
                 >
                     {displayData.map((item, idx) => {
@@ -177,7 +179,7 @@ export default function ActivityGallerySection({
                                     relative group rounded-2xl overflow-hidden cursor-pointer flex-shrink-0 
                                     shadow-sm hover:shadow-xl transition-all duration-300 
                                     bg-gray-100 dark:bg-gray-800
-                                    w-[85vw] snap-center
+                                    w-[85vw]
                                     ${getGridClass(idx)} md:w-auto
                                 `}
                                 onClick={() => setSelectedIndex(idx)}

@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import { ArrowRight, GraduationCap } from "lucide-react"
 
 interface AboutValue {
@@ -35,7 +33,7 @@ export default function AboutSectionPasraman({ initialData }: { initialData: Abo
     const [screenSize, setScreenSize] = useState<string>("lg")
 
     useEffect(() => {
-        AOS.init({ duration: 800, once: true })
+        
 
         const updateSize = () => {
             const width = window.innerWidth
@@ -48,7 +46,7 @@ export default function AboutSectionPasraman({ initialData }: { initialData: Abo
         }
 
         updateSize()
-        window.addEventListener("resize", updateSize)
+        window.addEventListener("resize", updateSize, { passive: true })
         return () => window.removeEventListener("resize", updateSize)
     }, [])
 
@@ -174,3 +172,5 @@ export default function AboutSectionPasraman({ initialData }: { initialData: Abo
         </section>
     )
 }
+
+

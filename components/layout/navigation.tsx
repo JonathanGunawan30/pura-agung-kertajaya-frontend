@@ -64,24 +64,12 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
 
     const getNavItems = (type: EntityType) => {
         const rootPath = type === 'pura' ? '' : `/${type}`
-        const baseItems = [
+        return [
             { label: "Beranda", href: `${rootPath}/` },
             { label: "Tentang", href: `${rootPath}/#about` },
             { label: "Galeri", href: `${rootPath}/#gallery` },
-        ]
-
-        if (type === 'pura') {
-            return [
-                ...baseItems,
-                { label: "Aktivitas", href: "/#activities" },
-                { label: "Fasilitas", href: "/#facilities" },
-                { label: "Organisasi", href: "/organization" },
-                { label: "Kontak", href: "/#contact" },
-            ]
-        }
-
-        return [
-            ...baseItems,
+            { label: "Aktivitas", href: `${rootPath}/#activities` },
+            { label: "Fasilitas", href: `${rootPath}/#facilities` },
             { label: "Organisasi", href: `${rootPath}/organization` },
             { label: "Kontak", href: `${rootPath}/#contact` },
         ]
@@ -198,7 +186,7 @@ export default function Navigation({ site, entityType = "pura" }: NavigationProp
 
             <div 
                 className={`
-                    fixed inset-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl
+                    fixed inset-0 h-[100dvh] z-40 bg-white/95 dark:bg-black/95 backdrop-blur-xl
                     flex flex-col justify-center items-center
                     transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
                     ${isOpen ? "opacity-100 translate-y-0 visible" : "opacity-0 translate-y-full invisible"}

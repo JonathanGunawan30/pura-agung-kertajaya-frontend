@@ -2,8 +2,6 @@
 
 import { useEffect, useState, useRef } from "react"
 import { ArrowRight, CheckCircle2, Star } from "lucide-react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 
 export interface Facility {
     id: string
@@ -72,7 +70,7 @@ export default function FacilitiesSection({ initialData, entityType }: Facilitie
     const theme = themeConfig[entityType] || themeConfig.pura
 
     useEffect(() => {
-        AOS.init({ duration: 700, once: true })
+        
         if (initialData.length > 0) setActiveFacility(initialData[0])
 
         const updateSize = () => {
@@ -82,7 +80,7 @@ export default function FacilitiesSection({ initialData, entityType }: Facilitie
             else setScreenSize("lg")
         }
         updateSize()
-        window.addEventListener("resize", updateSize)
+        window.addEventListener("resize", updateSize, { passive: true })
         return () => window.removeEventListener("resize", updateSize)
     }, [initialData])
 
@@ -245,14 +243,14 @@ export default function FacilitiesSection({ initialData, entityType }: Facilitie
 
                     <div
                         ref={tabsContainerRef}
-                        className="flex overflow-x-auto gap-3 py-2 px-1 -mx-6 px-6 no-scrollbar snap-x scroll-smooth"
+                        className="flex overflow-x-auto gap-3 py-2 -mx-6 px-6 no-scrollbar overscroll-behavior-x-auto touch-action-pan-x"
                     >
                         {initialData.map((facility, idx) => (
                             <button
                                 key={facility.id}
                                 onClick={() => { setActiveFacility(facility); setIsAutoPlaying(false); scrollTabIntoView(idx); }}
                                 className={`
-                                    flex-shrink-0 snap-center px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border
+                                    flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-300 border
                                     ${activeFacility?.id === facility.id
                                     ? `bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white shadow-lg scale-105`
                                     : `bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:${theme.activeBorder}`
@@ -283,3 +281,5 @@ export default function FacilitiesSection({ initialData, entityType }: Facilitie
         </section>
     )
 }
+
+

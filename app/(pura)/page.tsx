@@ -57,7 +57,7 @@ export default async function Home() {
     const otherSites = [yayasanIdentity, pasramanIdentity].filter(Boolean)
 
     return (
-        <main className="min-h-screen">
+        <main className="min-h-[100dvh]">
             <HeroCarousel
                 slides={heroSlides}
                 site={siteIdentity}

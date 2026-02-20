@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect } from "react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 import { CalendarWidget } from "@/components/ui/calendar-widget"
 
 interface Activity {
@@ -24,7 +22,7 @@ interface ActivitiesSectionProps {
 export default function ActivitiesSection({ initialData, entityType = "pura" }: ActivitiesSectionProps) {
 
     useEffect(() => {
-        AOS.init({ duration: 700, once: true })
+        
     }, [])
 
     const themeConfig = {
@@ -69,3 +67,4 @@ export default function ActivitiesSection({ initialData, entityType = "pura" }: 
         </section>
     )
 }
+

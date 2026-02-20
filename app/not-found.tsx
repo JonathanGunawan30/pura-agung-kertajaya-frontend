@@ -6,7 +6,7 @@ import catAnimation from "@/public/animations/cat-notfound.json";
 
 export default function NotFound() {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-300 bg-white dark:bg-neutral-950">
+        <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 transition-colors duration-300 bg-white dark:bg-neutral-950">
 
             <div className="w-full max-w-[280px] md:max-w-[400px] mb-8 relative">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-orange-100 dark:bg-orange-600/10 blur-3xl rounded-full -z-10"></div>

@@ -60,7 +60,7 @@ export default async function PasramanPage() {
     const otherSites = [puraIdentity, yayasanIdentity].filter(Boolean)
 
     return (
-        <main className="min-h-screen bg-emerald-50/20">
+        <main className="min-h-[100dvh] bg-emerald-50/20">
             <HeroCarousel
                 slides={heroSlides}
                 site={siteIdentity}

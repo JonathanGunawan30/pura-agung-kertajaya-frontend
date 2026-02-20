@@ -2,8 +2,6 @@
 
 import { useEffect } from "react"
 import { Mail, Phone, MapPin, Clock, Navigation, ArrowRight } from "lucide-react"
-import AOS from "aos"
-import "aos/dist/aos.css"
 
 type EntityType = "pura" | "yayasan" | "pasraman"
 
@@ -31,7 +29,7 @@ export default function ContactSection({
 }: ContactSectionProps) {
     
     useEffect(() => {
-        AOS.init({ duration: 700, once: true })
+        
     }, [])
 
     if (!initialData) return null;
@@ -193,3 +191,4 @@ export default function ContactSection({
         </section>
     )
 }
+

@@ -248,7 +248,7 @@ export default function GalleryGrid({ items, entityType }: GalleryGridProps) {
                     onClick={() => setSelectedIndex(null)}
                 >
                     <div
-                        className="relative w-full h-full flex items-center justify-center p-0 md:p-8"
+                        className="relative w-full h-full flex items-center justify-center p-0 md:p-8 touch-action-pan-y overscroll-contain"
                         onClick={(e) => e.stopPropagation()}
                         onTouchStart={onTouchStart}
                         onTouchMove={onTouchMove}

@@ -96,7 +96,7 @@ export default async function ArticlesPage({ searchParams }: Props) {
     <>
       <Navigation site={fixedSiteIdentity} entityType={currentEntityType} />
 
-      <main className="min-h-screen bg-gray-50 dark:bg-black pb-20 pt-28 md:pt-32">
+      <main className="min-h-[100dvh] bg-gray-50 dark:bg-black pb-20 pt-28 md:pt-32">
         <div className="container mx-auto px-4 md:px-6">
 
             <div className="text-center max-w-4xl mx-auto mb-16 space-y-6">

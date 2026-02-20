@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Star, X } from "lucide-react"
 import Marquee from "react-fast-marquee"
-import AOS from "aos"
-import "aos/dist/aos.css"
 
 export interface FeaturableReview {
     id: string
@@ -196,7 +194,7 @@ function ReviewCard({ review, onClickReadMore, theme }: {
     const isTextTruncated = rawText.length > 110;
 
     return (
-        <div className="relative shrink-0 w-[280px] sm:w-[320px] md:w-[350px] mr-4 md:mr-0 md:mx-3 min-h-[260px] p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col justify-between snap-center">
+        <div className="relative shrink-0 w-[280px] sm:w-[320px] md:w-[350px] mr-4 md:mr-0 md:mx-3 min-h-[260px] p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 flex flex-col justify-between">
             <div>
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -282,7 +280,7 @@ export default function TestimonialsSection({ reviews, entityType }: Testimonial
     }, [reviews, safeReviews, entityType]);
 
     useEffect(() => {
-        AOS.init({ duration: 700, once: true })
+        
         const updateGradientColor = () => {
             if (document.documentElement.classList.contains("dark")) {
                 setGradientColor("#030712");
@@ -342,7 +340,7 @@ export default function TestimonialsSection({ reviews, entityType }: Testimonial
                 </div>
             </div>
 
-            <div className="md:hidden w-full overflow-x-auto pb-8 pt-2 px-6 flex snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="md:hidden w-full overflow-x-auto pb-8 pt-2 px-6 flex overscroll-behavior-x-auto touch-action-pan-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {safeReviews.map((review, index) => (
                     <ReviewCard key={`${review.id}-mobile-${index}`} review={review} onClickReadMore={setSelectedReview} theme={theme} />
                 ))}
@@ -370,3 +368,4 @@ export default function TestimonialsSection({ reviews, entityType }: Testimonial
         </section>
     )
 }
+

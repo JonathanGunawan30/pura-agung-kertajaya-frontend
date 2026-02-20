@@ -60,7 +60,7 @@ export default async function YayasanPage() {
     const otherSites = [puraIdentity, pasramanIdentity].filter(Boolean)
 
     return (
-        <main className="min-h-screen bg-blue-50/30">
+        <main className="min-h-[100dvh] bg-blue-50/30">
             <HeroCarousel
                 slides={heroSlides}
                 site={siteIdentity}
